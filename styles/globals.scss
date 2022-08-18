@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply p-0 m-0 box-border;
+  }
+  html {
+    @apply text-[62.5%] scroll-smooth;
+  }
+  h1 {
+    @apply text-5xl m-2 p-2;
+  }
+  label,
+  p {
+    @apply text-[1.5rem];
+  }
+  input {
+    @apply px-3 py-2 bg-slate-50 border border-orange-200 rounded-md text-[1.2rem] shadow-sm focus:outline-none focus:border-sky-500 focus:ring-1 ring-inset focus:invalid:border-pink-500 focus:invalid:ring-pink-500;
+  }
+  button {
+    @apply py-[1rem] px-[3rem] bg-[#ffffffe1] hover:bg-[#ffffff]  rounded-lg text-[1.5rem] cursor-pointer border border-green-300 hover:border-white hover:ring-1 ring-inset focus:outline-none  focus:border-sky-500;
+  }
+}
+@layer components {
+  .subscript {
+    @apply text-sm text-gray-500 mx-2;
+  }
+}

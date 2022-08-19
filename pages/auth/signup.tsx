@@ -1,7 +1,7 @@
 import type { NextPage } from 'next';
 import { FormEvent, useState, useEffect, useContext, useRef } from 'react';
 import axios from 'axios';
-import Link, { LinkProps } from 'next/link';
+import Link from 'next/link';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
 import _ from 'lodash';
@@ -50,6 +50,7 @@ const Signup: NextPage = () => {
 
   async function handleFormSubmit(e: FormEvent) {
     e.preventDefault();
+
     setError({
       email: undefined,
       username: undefined,
@@ -78,6 +79,9 @@ const Signup: NextPage = () => {
             },
           },
           error: 'Something went wrong',
+        },
+        {
+          pauseOnHover: false,
         }
       );
     } catch (err: any) {
@@ -89,10 +93,9 @@ const Signup: NextPage = () => {
       });
     }
   }
-  console.log(error);
 
   return (
-    <form className='container m-auto h-screen flex flex-col justify-center items-center w-[50rem]'>
+    <form className='container m-auto  flex flex-col justify-center items-center w-[50rem] h-[100%]'>
       <div>
         <h1 className='text-center'>Signup to share code.</h1>
       </div>
@@ -125,7 +128,7 @@ const Signup: NextPage = () => {
         <div className='flex flex-col justify-between my-5 space-y-4'>
           <label htmlFor='uname'>Username </label>
           <input
-            autoComplete='username'
+            autoComplete='email'
             value={userDetails.username}
             onChange={updateUserState}
             type='text'
@@ -170,7 +173,7 @@ const Signup: NextPage = () => {
           {!_.isEmpty(error) && <Error msg={error.password2} />}
         </div>
       </div>
-      <div className=' w-full flex gap-5 justify-start items-center'>
+      <div className=' w-full flex gap-5 justify-start items-center mb-5'>
         <button onClick={handleFormSubmit} type='submit'>
           Signup
         </button>

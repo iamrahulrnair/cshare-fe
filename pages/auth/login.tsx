@@ -55,19 +55,18 @@ const Login: NextPage = () => {
       router.push('/');
     } catch (err: any) {
       setError({
-        email: err.response.data.email,
-        password: err.response.data.password,
-        message: err.response.data.message,
+        email: err.response.data.email || '',
+        password: err.response.data.password || '',
+        message: err.response.data.message || '',
       });
     }
   }
   useEffect(() => {
     (async () => {
-      await axios.get('http://127.0.0.1:8000/api/account/csrf', {
+      await axios.get('http://127.0.0.1:8000/api/account/csrf/', {
         withCredentials: true,
       });
       setCsrf(getCookie('csrftoken'));
-      console.log(csrf);
     })();
   }, []);
 

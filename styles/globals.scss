@@ -22,9 +22,26 @@
   button {
     @apply py-[1rem] px-[3rem] bg-[#ffffffe1] hover:bg-[#ffffff]  rounded-lg text-[1.5rem] cursor-pointer border border-green-300 hover:border-white hover:ring-1 ring-inset focus:outline-none  focus:border-sky-500;
   }
+  a {
+    @apply text-gray-800  hover:text-slate-600;
+  }
+  li {
+    @apply text-gray-800;
+  }
 }
 @layer components {
   .subscript {
     @apply text-sm text-gray-500 mx-2;
   }
+}
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+* ::selection {
+  background: rgb(7, 97, 5) !important;
+}
+* ::-moz-selection {
+  background: #138a0f !important;
 }

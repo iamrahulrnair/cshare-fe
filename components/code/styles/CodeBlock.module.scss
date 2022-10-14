@@ -1,0 +1,41 @@
+.lineNumber {
+  display: inline-block;
+  width: 2em;
+  user-select: none;
+  opacity: 0.6;
+
+  &:hover {
+    color: white;
+    opacity: 1;
+  }
+}
+.codeBlock {
+  width: auto;
+  text-align: left;
+  margin: 0;
+  padding: 1em 1em 1.5em 1em;
+  font-size: 1.4rem;
+  cursor: pointer;
+  border-radius: 5px;
+  box-shadow: rgba(6, 24, 44, 0.4) 0px 0px 0px 2px,
+    rgba(6, 24, 44, 0.65) 0px 4px 6px -1px,
+    rgba(255, 255, 255, 0.08) 0px 1px 0px inset;
+}
+.blockLine {
+  display: block;
+  line-height: 1.3em;
+  transition: padding 100ms ease-in-out;
+
+  &:hover {
+    padding: 4px 0;
+    border-top: 1px #eee dotted;
+    border-bottom: 1px #eee dotted;
+    background-color: rgba(139, 0, 139, 0.223);
+  }
+}
+.token {
+  transition: unset;
+  &:hover:not(.whitespace) {
+    // background-color: darkmagenta;
+  }
+}

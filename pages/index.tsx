@@ -6,8 +6,6 @@ import _ from 'lodash';
 import Link from 'next/link';
 
 const Home: NextPage = ({ authUser, data }: any) => {
-  console.log(data);
-
   return (
     data.length > 0 &&
     data.map((el: any) => (

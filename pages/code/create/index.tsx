@@ -34,7 +34,7 @@ function App() {
     code: undefined,
     is_public: check,
   });
-  function updateCodeState(e: any) {
+  function handleCodeUpdate(e: any) {
     setError({ code: '', description: '' });
     if (e.target) {
       const { name, value } = e.target;
@@ -68,9 +68,6 @@ function App() {
         code: err.response.data.code || '',
         description: err.response.data.description || '',
       });
-      console.log(err);
-
-      console.log(error);
     }
   }
 
@@ -78,7 +75,7 @@ function App() {
     <div className='mx-[120px] my-[auto] py-7 gap-7 flex flex-col'>
       <input
         name='description'
-        onChange={updateCodeState}
+        onChange={handleCodeUpdate}
         value={codeDetails.description}
         placeholder='Code description...'
         type='text'
@@ -89,15 +86,16 @@ function App() {
           <input
             type='text'
             name='extension'
-            onChange={updateCodeState}
+            onChange={handleCodeUpdate}
             value={codeDetails.extension}
             placeholder='Filename including extension...'
             className='w-[200px]'
           />
         </div>
         <CodeEditor
-          updateCodeState={updateCodeState}
+          handleCodeUpdate={handleCodeUpdate}
           codeDetails={codeDetails}
+          height={'200px'}
         />
       </div>
       {!_.isEmpty(error.code) && <Error msg={error.code} />}

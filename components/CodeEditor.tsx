@@ -3,18 +3,20 @@ import dynamic from 'next/dynamic';
 
 const Editor = dynamic(import('@monaco-editor/react'), { ssr: false });
 
-function App({ updateCodeState, codeDetails, options = {} }: any) {
+function App({ handleCodeUpdate, codeDetails, options = {} }: any) {
   const [height, setHeight] = useState(0);
 
   function handleEditorDidMount(editor: any, _: any) {
-    setHeight(editor.getContentHeight());
-    // console.log(editor.getModel()?.getLineCount());
+    setHeight(
+      editor.getContentHeight() <= 65 ? 300 : editor.getContentHeight()
+    );
   }
+
   return (
     <Editor
       // @ts-ignore
       height={height}
-      onChange={(code) => updateCodeState(code!)}
+      onChange={(code) => handleCodeUpdate(code!)}
       value={codeDetails.code}
       theme='vs-dark'
       onMount={handleEditorDidMount}

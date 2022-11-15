@@ -20,7 +20,7 @@
     @apply px-3 py-2 bg-slate-50 border border-orange-200 rounded-md text-[1.2rem] shadow-sm focus:outline-none focus:border-sky-500 focus:ring-1 ring-inset focus:invalid:border-pink-500 focus:invalid:ring-pink-500;
   }
   button {
-    @apply py-[1rem] px-[3rem] bg-[#ffffffe1] hover:bg-[#ffffff]  rounded-lg text-[1.5rem] cursor-pointer border border-green-300 hover:border-white hover:ring-1 ring-inset focus:outline-none  focus:border-sky-500;
+    @apply py-[1rem] px-[3rem] bg-[#ffffffe1] hover:bg-[#ffffff]  rounded-lg text-[1.5rem] border border-green-300 hover:border-white hover:ring-1 ring-inset focus:outline-none  focus:border-sky-500 enabled:transition enabled:transform enabled:hover:translate-x-1 disabled:cursor-not-allowed enabled:cursor-pointer;
   }
   a {
     @apply text-gray-800  hover:text-slate-600;

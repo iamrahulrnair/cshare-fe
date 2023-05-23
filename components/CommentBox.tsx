@@ -1,55 +1,59 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { Avatar } from 'antd';
 
 function CommentBox(props: any) {
   const { authUser, commentDetails, handleCommentUpdate, handleCommentDelete } =
     props;
   const [readOnlyComment, setReadOnlyComment] = useState(true);
   const [comment, setComment] = useState(commentDetails.comment);
-
+  const AuthUserIsOwner =
+    authUser.username == commentDetails.user_details.username;
   return (
     <div key={commentDetails.id} className='rounded-t-md my-7'>
-      <div className='flex gap-4 items-center border-2 p-4 rounded-lg border-grey-200'>
-        <img
-          className='rounded-full w-[40px] my-3 '
-          src={`http://127.0.0.1:8000${commentDetails.user_details.image}`}
-          alt=''
-        />
-        <div>
-          <Link href={`/${commentDetails.user_details.username}`}>
-            <span className='text-[20px]'>
-              {commentDetails.user_details.username}
-            </span>
-          </Link>
-        </div>
-        {authUser.username == commentDetails.user_details.username ? (
-          <div className='flex gap-2'>
-            <span
-              className='hover:text-green-700 text-green-500 cursor-pointer'
-              onClick={() => {
-                readOnlyComment
-                  ? setReadOnlyComment(false)
-                  : (() => {
-                      handleCommentUpdate(commentDetails.id, comment);
-                      setReadOnlyComment(true);
-                    })();
-              }}
-            >
-              {readOnlyComment ? 'Edit' : 'Update'}
-            </span>
-            <strong>/</strong>
-            <span
-              className='hover:text-red-700 text-red-500 cursor-pointer'
-              onClick={() => {
-                handleCommentDelete(commentDetails.id);
-              }}
-            >
-              Delete
-            </span>
+      <div
+        className={`flex gap-4 items-center border-2 p-4 rounded-lg border-grey-200 + ${
+          AuthUserIsOwner ? 'justify-end' : ''
+        }`}
+      >
+        <div className='flex  justify-center items-center gap-5'>
+          <Avatar size={50} src={commentDetails.user_details.image} />
+          <div>
+            <Link href={`/${commentDetails.user_details.username}`}>
+              <span className='text-[20px]'>
+                {commentDetails.user_details.username}
+              </span>
+            </Link>
           </div>
-        ) : (
-          ''
-        )}
+          {authUser.username == commentDetails.user_details.username ? (
+            <div className='flex gap-2'>
+              <span
+                className='hover:text-green-700 text-green-500 cursor-pointer'
+                onClick={() => {
+                  readOnlyComment
+                    ? setReadOnlyComment(false)
+                    : (() => {
+                        handleCommentUpdate(commentDetails.id, comment);
+                        setReadOnlyComment(true);
+                      })();
+                }}
+              >
+                {readOnlyComment ? 'Edit' : 'Update'}
+              </span>
+              <strong>/</strong>
+              <span
+                className='hover:text-red-700 text-red-500 cursor-pointer'
+                onClick={() => {
+                  handleCommentDelete(commentDetails.id);
+                }}
+              >
+                Delete
+              </span>
+            </div>
+          ) : (
+            ''
+          )}
+        </div>
       </div>
       <textarea
         defaultValue={comment}

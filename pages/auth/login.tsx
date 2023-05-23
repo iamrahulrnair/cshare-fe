@@ -4,12 +4,14 @@ import Link from 'next/link';
 import { FormEvent } from 'react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import _ from 'lodash';
+import _, { set } from 'lodash';
+import Router from 'next/router';
 
 import { Error } from '../../components/utils/Error';
-import { AuthContext } from '../../context/utils/auth';
-import { getCookie } from '../../utils/auth';
 import { useRouter } from 'next/router';
+import { getFetcher } from '../../utils/axios/axios';
+import { clearAuthCookies, saveTokensAsCookie } from '../../utils/auth/cookie';
+import { AuthContext } from '../../context/auth';
 
 const Login: NextPage = () => {
   const [userDetails, setUserDetails] = useState({
@@ -20,29 +22,34 @@ const Login: NextPage = () => {
     email: string | undefined;
     password: string | undefined;
     message: string | undefined;
-  }>({ email: undefined, password: undefined, message: undefined });
+  }>({
+    email: undefined,
+    password: undefined,
+    message: undefined,
+  });
 
-  const { csrf, setCsrf } = useContext(AuthContext);
-
+  const { authUser, setAuthUser } = useContext(AuthContext);
   const router = useRouter();
+
+  useEffect(() => {
+    setAuthUser({ isAuthenticated: false });
+    clearAuthCookies();
+  }, []);
   function updateUserState(e: any) {
     const { name, value } = e.target;
     setUserDetails({ ...userDetails, [name]: value });
   }
   async function handleFormSubmit(e: FormEvent) {
     e.preventDefault();
+    const axiosInstance = getFetcher();
 
     try {
-      await toast.promise(
-        axios.post('http://127.0.0.1:8000/api/account/login/', userDetails, {
-          withCredentials: true,
-          headers: { 'X-CSRFToken': csrf },
-        }),
+      const response = await toast.promise(
+        axiosInstance.post('account/token/', userDetails),
         {
           pending: 'logging in...',
           success: {
             render: ({ data }: any) => {
-              setCsrf(getCookie('csrftoken'));
               return 'Login successful';
             },
           },
@@ -52,23 +59,22 @@ const Login: NextPage = () => {
           pauseOnHover: false,
         }
       );
-      router.push('/');
+      const { access: access_token, refresh: refresh_token } = response.data;
+
+      saveTokensAsCookie({
+        access_token,
+        refresh_token,
+      });
+      setAuthUser({ isAuthenticated: true });
+      router.push((router.query.next as string) || '/');
     } catch (err: any) {
       setError({
         email: err.response.data.email || '',
         password: err.response.data.password || '',
-        message: err.response.data.message || '',
+        message: err.response.data.detail || '',
       });
     }
   }
-  useEffect(() => {
-    (async () => {
-      await axios.get('http://127.0.0.1:8000/api/account/csrf/', {
-        withCredentials: true,
-      });
-      setCsrf(getCookie('csrftoken'));
-    })();
-  }, []);
 
   return (
     <div className='m-auto h-screen flex justify-center items-center'>

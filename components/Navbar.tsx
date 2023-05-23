@@ -1,12 +1,12 @@
 import Link from 'next/link';
-import axios from 'axios';
-import { getCookie } from '../utils/auth';
 import { useRouter } from 'next/router';
-import { Menu } from 'antd';
-import { UserOutlined } from '@ant-design/icons';
+import { Avatar, Menu } from 'antd';
+import { useContext } from 'react';
+import { AuthContext } from '../context/auth';
 
-export default function Navbar({ authUser }: any) {
+export default function Navbar() {
   const router = useRouter();
+  const { authUser } = useContext(AuthContext);
 
   return (
     <nav className='px-10 bg-slate-300 flex justify-between  items-center'>
@@ -28,12 +28,12 @@ export default function Navbar({ authUser }: any) {
             <Link href='/archive'>Archive</Link>
           </li>
           <li>
-            <Link href='/latest'>What's new</Link>
+            <Link href='/latest'>What&#39;s new</Link>
           </li>
           <li>
             {authUser.isAuthenticated && (
               <Menu
-                className='rounded-[5px] flex'
+                className='rounded-[5px] min-w-[200px] flex justify-center items-center p-3'
                 mode='horizontal'
                 items={[
                   {
@@ -41,35 +41,27 @@ export default function Navbar({ authUser }: any) {
                     key: 'settings',
                     children: [
                       {
+                        className: 'text-red-500',
                         label: 'logout',
                         key: 'logout',
                         onClick: async () => {
-                          await axios.post(
-                            'http://127.0.0.1:8000/api/account/logout/',
-                            {},
-                            {
-                              withCredentials: true,
-                              headers: {
-                                'X-CSRFToken': getCookie('csrftoken')!,
-                              },
-                            }
-                          );
-                          router.push('/');
+                          router.push('/auth/logout');
                         },
                       },
                       {
                         label: 'Create Code',
                         key: 'gist',
                         onClick: () => {
-                          router.push('/code/create/', '', { shallow: true });
+                          router.push('/code/create/');
                         },
                       },
                     ],
                     icon: (
-                      <img
-                        className='rounded-[50%] h-[30px] inline'
+                      <Avatar
                         src={authUser.image}
-                        alt=''
+                        gap={6}
+                        size={'large'}
+                        draggable={false}
                       />
                     ),
                   },

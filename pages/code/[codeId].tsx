@@ -1,56 +1,38 @@
-import { NextPage } from 'next';
+import { GetServerSidePropsContext, NextPage } from 'next';
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import axios from 'axios';
-import { Modal } from 'antd';
+import { Modal, Divider } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 const { confirm } = Modal;
 
-import { AuthContext } from '../../context/utils/auth';
+import { AuthContext } from '../../context/auth';
 import CodeEditor from '../../components/CodeEditor';
 import { useRouter } from 'next/router';
-import { getCookie } from '../../utils/auth';
 import CommentBox from '../../components/CommentBox';
+import { ProtectedPageRoute } from '../../utils/auth/session';
+import { getFetcher } from '../../utils/axios/axios';
 
 const CodeDetail: NextPage = (props: any) => {
-  console.log(props);
-
-  const { csrf, setCsrf } = useContext(AuthContext);
-  const { codeDetails } = props.data;
-  const [userComments, setUserComments] = useState(props.data.comments);
-  const authUser = props.authUser;
-  const matchCode = authUser.username + '/' + codeDetails.extension;
+  const { authUser } = useContext(AuthContext);
+  const { codeDetails, comments } = props.data;
+  const [userComments, setUserComments] = useState(comments);
   const [readOnly, setReadOnly] = useState(true);
   const [comment, setComment] = useState('');
-
   const router = useRouter();
 
-  useEffect(() => {
-    (async () => {
-      await axios.get('http://127.0.0.1:8000/api/account/csrf/', {
-        withCredentials: true,
-      });
-      setCsrf(getCookie('csrftoken'));
-    })();
-  }, []);
+  const COMMENT_PATH = `code/${codeDetails.id}/comments/`;
+  const matchCode = authUser.username + '/' + codeDetails.extension;
 
-  try {
-    codeDetails.code = JSON.parse(codeDetails.code);
-  } catch (err: any) {}
+  console.log(props);
 
   const onSubmitComment = async () => {
+    const axiosInstance = getFetcher();
+
     try {
-      const response = await axios.post(
-        'http://127.0.0.1:8000/api/code/comment/',
-        {
-          comment,
-          code: codeDetails.id,
-        },
-        {
-          withCredentials: true,
-          headers: { 'X-CSRFToken': csrf },
-        }
-      );
-      setUserComments([...userComments, response.data.data]);
+      const response = await axiosInstance.post(COMMENT_PATH, {
+        comment,
+      });
+      setUserComments([...userComments, response.data]);
       setComment('');
     } catch (err: any) {
       console.log(err);
@@ -65,7 +47,6 @@ const CodeDetail: NextPage = (props: any) => {
         },
         {
           withCredentials: true,
-          headers: { 'X-CSRFToken': csrf },
         }
       );
       const currentComments = userComments;
@@ -80,7 +61,6 @@ const CodeDetail: NextPage = (props: any) => {
     try {
       await axios.delete(`http://127.0.0.1:8000/api/code/comment/${id}/`, {
         withCredentials: true,
-        headers: { 'X-CSRFToken': csrf },
       });
       let currentComments = userComments;
       currentComments = currentComments.filter((c: any) => c.id != id);
@@ -124,7 +104,6 @@ const CodeDetail: NextPage = (props: any) => {
                 `http://127.0.0.1:8000/api/code/${codeDetails.id}/`,
                 {
                   withCredentials: true,
-                  headers: { 'X-CSRFToken': getCookie('csrftoken')! },
                 }
               );
               resolve(res);
@@ -151,7 +130,6 @@ const CodeDetail: NextPage = (props: any) => {
         },
         {
           withCredentials: true,
-          headers: { 'X-CSRFToken': csrf },
         }
       );
       console.log(response);
@@ -162,12 +140,11 @@ const CodeDetail: NextPage = (props: any) => {
 
   return (
     <div className='mx-[120px] my-[auto] py-10'>
-      <h1>Code Detail</h1>
       <div className=' bg-slate-300 px-3 py-4 rounded-t-md flex gap-4'>
         <p className='mx-5'>{codeDetails.description}</p>
         {authUser.email == codeDetails.user_details.email ? (
           <div>
-            <div className='flex gap-2'>
+            <div className='flex justify-center items-center gap-2'>
               <span
                 className='hover:text-green-700 text-green-600 cursor-pointer'
                 onClick={() =>
@@ -181,14 +158,14 @@ const CodeDetail: NextPage = (props: any) => {
               >
                 {readOnly ? 'Edit' : 'Update'}
               </span>
-              <strong>/</strong>
+              <Divider type='vertical' />
               <span
                 className='hover:text-red-700 text-red-500 cursor-pointer'
                 onClick={handleDelete}
               >
                 Delete
               </span>
-              <strong>/</strong>
+              <Divider type='vertical' />
               <span
                 className='hover:text-red-700 text-blue-500 cursor-pointer'
                 // onClick={handleDelete}
@@ -203,7 +180,7 @@ const CodeDetail: NextPage = (props: any) => {
               className='hover:text-red-700 text-blue-500 cursor-pointer'
               // onClick={handleDelete}
             >
-              Fork
+              Copy
             </span>
           </div>
         )}
@@ -220,18 +197,20 @@ const CodeDetail: NextPage = (props: any) => {
           <p className='p-3'>Share what u express by writing a comment</p>
         </div>
         {userComments.length > 0 ? (
-          userComments.map((el: any) => {
+          userComments.map((el: any, index) => {
             return (
-              <CommentBox
-                commentDetails={el}
-                authUser={authUser}
-                handleCommentUpdate={handleCommentUpdate}
-                handleCommentDelete={handleCommentDelete}
-              />
+              <React.Fragment key={index}>
+                <CommentBox
+                  commentDetails={el}
+                  authUser={authUser}
+                  handleCommentUpdate={handleCommentUpdate}
+                  handleCommentDelete={handleCommentDelete}
+                />
+              </React.Fragment>
             );
           })
         ) : (
-          <div>no comments</div>
+          <Divider plain>No comments</Divider>
         )}
         <div>
           <textarea
@@ -255,23 +234,20 @@ const CodeDetail: NextPage = (props: any) => {
     </div>
   );
 };
-export async function getServerSideProps({ params }: any) {
-  try {
-    const res = await axios.get(
-      `http://127.0.0.1:8000/api/code/${params.codeId}/`
-    );
+export async function getServerSideProps(ctx: GetServerSidePropsContext) {
+  return ProtectedPageRoute(ctx, null, async () => {
+    const axiosInstance = getFetcher(ctx.req);
+    const { params } = ctx;
+    const {
+      data: { data },
+    } = await axiosInstance.get(`code/${params.codeId}/`);
+
     return {
-      props: {
-        data: {
-          codeDetails: res.data.data.code,
-          comments: res.data.data.comments,
-        },
+      data: {
+        codeDetails: data.code,
+        comments: data.comments,
       },
     };
-  } catch (err: any) {
-    return {
-      notFound: true,
-    };
-  }
+  });
 }
 export default CodeDetail;

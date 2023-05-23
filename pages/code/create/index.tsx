@@ -1,69 +1,59 @@
 import { useState, useContext, useEffect } from 'react';
-import dynamic from 'next/dynamic';
-import axios from 'axios';
 import { useRouter } from 'next/router';
 import _ from 'lodash';
 
-import { getCookie } from '../../../utils/auth';
-import { AuthContext } from '../../../context/utils/auth';
+import { AuthContext } from '../../../context/auth';
 import { Error } from '../../../components/utils/Error';
 import CodeEditor from '../../../components/CodeEditor';
+import { getFetcher } from '../../../utils/axios/axios';
+import { AppContext, AppProps } from 'next/app';
+import { GetServerSidePropsContext } from 'next';
+import { ProtectedPageRoute } from '../../../utils/auth/session';
+import { Switch } from 'antd';
+// import { ProtectedPageRoute } from '../../../utils/auth/session';
 
-function App() {
-  const { csrf, setCsrf } = useContext(AuthContext);
-  const [check, setCheck] = useState(false);
+function App(pageProps: AppProps) {
+  const { authUser } = useContext(AuthContext);
+  console.log('executed');
+
   const [error, setError] = useState<any>({
     code: '',
     description: '',
   });
-
-  useEffect(() => {
-    (async () => {
-      await axios.get('http://127.0.0.1:8000/api/account/csrf/', {
-        withCredentials: true,
-      });
-      setCsrf(getCookie('csrftoken'));
-    })();
-  }, []);
-
-  const router = useRouter();
-
   const [codeDetails, setCodeDetails] = useState<any>({
     extension: '',
     description: '',
     code: undefined,
-    is_public: check,
+    is_public: false,
   });
+  const router = useRouter();
+
   function handleCodeUpdate(e: any) {
     setError({ code: '', description: '' });
     if (e.target) {
-      const { name, value } = e.target;
+      const { name, value, checked } = e.target;
+
       setCodeDetails({
         ...codeDetails,
         [name]: value,
+        is_public: name == 'is_public' ? checked : codeDetails.is_public,
       });
     } else {
-      setCodeDetails({ ...codeDetails, code: e == '' ? undefined : e });
+      setCodeDetails({
+        ...codeDetails,
+        code: e == '' ? undefined : e,
+      });
     }
   }
   async function handleCodeSubmit(e: any) {
     e.preventDefault();
-
     try {
-      await axios.post(
-        'http://127.0.0.1:8000/api/code/',
-        {
-          ...codeDetails,
-          code: JSON.stringify(codeDetails.code),
-          is_public: check,
-        },
-        {
-          withCredentials: true,
-          headers: { 'X-CSRFToken': csrf },
-        }
-      );
-      router.push('/');
+      const axiosInstance = getFetcher();
+      await axiosInstance.post('code/', codeDetails);
+      // await axiosInstance.post('code', codeDetails);
+      // router.push('/code');
     } catch (err: any) {
+      console.log(err.response.data);
       setError({
         code: err.response.data.code || '',
         description: err.response.data.description || '',
@@ -103,11 +93,11 @@ function App() {
         <label htmlFor='code'>
           Note: This is will be a &nbsp;
           <span className='font-extrabold'>
-            {!check ? 'private' : 'public'}
+            {!codeDetails.is_public ? 'private' : 'public'}
           </span>
           &nbsp; code block, click below to set it &nbsp;
           <span className='font-extrabold'>
-            {!check ? 'public' : 'private'}
+            {!codeDetails.is_public ? 'public' : 'private'}
           </span>
           &nbsp;
         </label>
@@ -115,9 +105,8 @@ function App() {
           className='mx-5'
           id='code'
           name='is_public'
-          onChange={() => setCheck(!check)}
+          onChange={handleCodeUpdate}
           type='checkbox'
-          checked={check}
         ></input>
         <button className='mx-5' onClick={handleCodeSubmit}>
           Contribute to cshare
@@ -126,5 +115,9 @@ function App() {
     </div>
   );
 }
+
+export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
+  return ProtectedPageRoute(ctx, null, null);
+};
 
 export default App;

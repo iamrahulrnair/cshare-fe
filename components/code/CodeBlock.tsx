@@ -11,15 +11,13 @@ const BlogCodeBlock = ({ code, language }: any) => (
     code={code.trim()}
     language={language}
   >
-    {({ className, style, tokens, getLineProps, getTokenProps }) => {
+    {(codeProps) => {
+      const { style, tokens, getLineProps, getTokenProps } = codeProps;
       return (
-        <pre className={styles.codeBlock} style={style}>
+        <pre className={styles.codeBlock + ' cursor-pointer'} style={style}>
           {tokens.map((line, i) => {
             return (
-              <span
-                {...getLineProps({ line, key: i })}
-                className={styles.blockLine}
-              >
+              <span key={i} className={styles.blockLine}>
                 <span className={styles.lineNumber}>{i + 1}</span>
                 {line.map((token, key) => {
                   const props = getTokenProps({ token, key });
@@ -27,12 +25,7 @@ const BlogCodeBlock = ({ code, language }: any) => (
                   if (key === 0 && !/\S/.test(props.children)) {
                     props.className += styles.whitespace;
                   }
-                  return (
-                    <span
-                      {...props}
-                      className={[props.className, styles.token].join(' ')}
-                    />
-                  );
+                  return <span key={key} {...props} />;
                 })}
               </span>
             );

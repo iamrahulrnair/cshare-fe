@@ -1,17 +1,15 @@
 import type { NextPage } from 'next';
-import { FormEvent, useState, useEffect, useContext, useRef } from 'react';
-import axios from 'axios';
+import { FormEvent, useContext, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
 import _ from 'lodash';
-
-import { getCookie } from '../../utils/auth';
-import { AuthContext } from '../../context/utils/auth';
+import { AuthContext } from '../../context/auth';
 import { Error } from '../../components/utils/Error';
+import { getFetcher } from '../../utils/axios/axios';
+import { saveTokensAsCookie } from '../../utils/auth/cookie';
 
 const Signup: NextPage = () => {
-  const { csrf, setCsrf } = useContext(AuthContext);
   const [error, setError] = useState<{
     email: string | undefined;
     username: string | undefined;
@@ -24,15 +22,7 @@ const Signup: NextPage = () => {
     password2: undefined,
   });
   const router = useRouter();
-
-  useEffect(() => {
-    (async () => {
-      const res = await axios.get('http://127.0.0.1:8000/api/account/csrf', {
-        withCredentials: true,
-      });
-      setCsrf(getCookie('csrftoken'));
-    })();
-  }, []);
+  const { setAuthUser } = useContext(AuthContext);
 
   const [userDetails, setUserDetails] = useState({
     email: '',
@@ -57,25 +47,18 @@ const Signup: NextPage = () => {
       password: undefined,
       password2: undefined,
     });
+    const axiosInstance = getFetcher();
     try {
       const response = await toast.promise(
-        axios.request({
-          method: 'POST',
-          url: 'http://127.0.0.1:8000/api/account/register/',
-          withCredentials: true,
-          data: userDetails,
-          headers: {
-            'X-CSRFToken': csrf,
-          },
+        axiosInstance.post('account/register/', {
+          ...userDetails,
         }),
         {
           pending: 'Signing in...',
           success: {
             render: ({ data }: any) => {
-              router.push('/auth/login');
-              return `Hey there ${
-                data.data.first_name || 'POI'
-              }, Welcome to cshare.`;
+              console.log(data);
+              return `Hey there, Welcome to cshare.`;
             },
           },
           error: 'Something went wrong',
@@ -84,6 +67,15 @@ const Signup: NextPage = () => {
           pauseOnHover: false,
         }
       );
+      const { access: access_token, refresh: refresh_token } = response.data;
+      saveTokensAsCookie({
+        access_token,
+        refresh_token,
+      });
+      setAuthUser({
+        isAuthenticated: true,
+      });
+      router.push('/');
     } catch (err: any) {
       setError({
         username: err.response.data.username,

@@ -1,48 +1,28 @@
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import App from 'next/app';
-import axios from 'axios';
 
 import Navbar from '../components/Navbar';
 import 'antd/dist/antd.css';
 import '../styles/globals.scss';
-import AuthContextProvider from '../context/utils/auth';
+import AuthContextProvider from '../context/auth';
+import { Divider } from 'antd';
 
-function MyApp({ Component, pageProps, authUser }: any) {
+function MyApp({ Component, pageProps }: any) {
   return (
-    <div>
-      <AuthContextProvider>
-        <Navbar authUser={authUser} />
-        <Component {...pageProps} authUser={authUser} />
-        <ToastContainer />
-      </AuthContextProvider>
-    </div>
+    <AuthContextProvider>
+      <Navbar />
+      <div className='w-[1400px] my-0 mx-auto min-h-[100vh]'>
+        <Component {...pageProps} />
+      </div>
+      <Divider>
+        <p className='text-center text-gray-500'>
+          © 2021 <span className='text-gray-900 bold'>Cshare</span>
+        </p>
+      </Divider>
+
+      <ToastContainer />
+    </AuthContextProvider>
   );
 }
-
-MyApp.getInitialProps = async (appContext: any) => {
-  const pageProps = await App.getInitialProps(appContext);
-  try {
-    var response;
-    response = await axios.get('http://127.0.0.1:8000/api/account/me', {
-      withCredentials: true,
-      headers: {
-        ...(appContext.ctx.req && {
-          Cookie: appContext.ctx.req.headers.cookie,
-        }),
-      },
-    });
-
-    return {
-      ...pageProps,
-      authUser: { ...response.data, isAuthenticated: true },
-    };
-  } catch (err) {
-    return {
-      ...pageProps,
-      authUser: { isAuthenticated: false },
-    };
-  }
-};
 
 export default MyApp;

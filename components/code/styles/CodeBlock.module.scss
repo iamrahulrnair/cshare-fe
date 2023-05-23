@@ -10,11 +10,9 @@
   }
 }
 .codeBlock {
-  width: auto;
-  text-align: left;
-  margin: 0;
   padding: 1em 1em 1.5em 1em;
   font-size: 1.4rem;
+  min-height: 20rem;
   cursor: pointer;
   border-radius: 5px;
   box-shadow: rgba(6, 24, 44, 0.4) 0px 0px 0px 2px,
@@ -31,11 +29,5 @@
     border-top: 1px #eee dotted;
     border-bottom: 1px #eee dotted;
     background-color: rgba(139, 0, 139, 0.223);
-  }
-}
-.token {
-  transition: unset;
-  &:hover:not(.whitespace) {
-    // background-color: darkmagenta;
   }
 }

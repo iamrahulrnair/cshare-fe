@@ -1,5 +1,5 @@
 import type { NextPage } from 'next';
-import CodeBlock from '../components/code/CodeBlock';
+import {CodeBlock} from '../components/code';
 
 import _ from 'lodash';
 import Link from 'next/link';
@@ -7,41 +7,75 @@ import { getFetcher } from '../utils/axios/axios';
 import { useEffect } from 'react';
 import { Col, Row, Avatar, Divider } from 'antd';
 
-const Home: NextPage = ({ authUser, data }: any) => {
+interface codeDetailsProps {
+  id: number;
+  extension: string;
+  description: string;
+  code: string;
+  is_public: boolean;
+  created_at: string;
+  updated_at: string;
+  user_details: {
+    email: string;
+    username: string;
+    first_name: string;
+    last_name: string;
+    image: string;
+  };
+}
+
+const Home = ({
+  authUser,
+  data,
+}: {
+  authUser: any;
+  data: codeDetailsProps[];
+}) => {
   return (
     data.length > 0 &&
-    data.map((el: any, index) => {
+    data.map((code: codeDetailsProps, index) => {
       return (
         <>
-          <Row className='bg-slate-100 mt-20'>
-            <Col span={18}>
-              <Link href={`/code/${el.id}`} key={index}>
-                <div key={el.id} className='flex flex-col '>
-                  <CodeBlock code={el.code} language={el.extension} />
-                </div>
-              </Link>
-            </Col>
-            <Col span={6}>
-              <div className='flex flex-col justify-evenly items-center h-full'>
-                <div className='flex justify-center items-center '>
-                  <Avatar
-                    draggable={false}
-                    src={el.user_details.image}
-                    size={50}
-                  ></Avatar>
-                  <Divider type='vertical' />
-                  <a
-                    href={`/users/${el.user_details.username}`}
-                    className='text-xl text-blue-500'
-                  >
-                    @{el.user_details.username}
-                  </a>
-                </div>
-                <Divider dashed />
-                <p className='text-2xl font-bold'>{el.description}</p>
+          <div className=' mt-20'>
+            <div className='flex p-5 justify-start items-center'>
+              <div>
+                <Avatar
+                  draggable={false}
+                  src={code.user_details.image}
+                  size={50}
+                ></Avatar>
               </div>
-            </Col>
-          </Row>
+              <Divider type='vertical' />
+              <div className='flex flex-col'>
+                <div className='flex justify-center items-center gap-4'>
+                  <Link
+                    href={`/users/${code.user_details.username}`}
+                    className='inline-block'
+                  >
+                    <a>{code.user_details.username}</a>
+                  </Link>
+                  /
+                  <Link href={`/code/${code.id}`} className='inline-block'>
+                    <a>{code.extension}</a>
+                  </Link>
+                </div>
+                <div>
+                  <p className='subscript'>
+                    {/* TODO: create an issue for this, convert to user readable format */}
+                    created at: {code.created_at}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <Link href={`/code/${code.id}`} key={index}>
+              <div key={code.id}>
+                <CodeBlock
+                  code={code.code}
+                  language={code.extension.split('.').pop()}
+                />
+              </div>
+            </Link>
+          </div>
         </>
       );
     })
@@ -58,6 +92,7 @@ export async function getServerSideProps({ req }: any) {
       },
     };
   } catch (err: any) {
+    console.log(err);
     return {
       props: {
         data: [],

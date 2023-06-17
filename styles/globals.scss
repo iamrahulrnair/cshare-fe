@@ -1,3 +1,5 @@
+@import 'variables';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -16,32 +18,128 @@
   p {
     @apply text-[1.5rem];
   }
-  input {
-    @apply px-3 py-2 bg-slate-50 border border-orange-200 rounded-md text-[1.2rem] shadow-sm focus:outline-none focus:border-sky-500 focus:ring-1 ring-inset focus:invalid:border-pink-500 focus:invalid:ring-pink-500;
-  }
-  button {
-    @apply py-[1rem] px-[3rem] bg-[#ffffffe1] hover:bg-[#ffffff]  rounded-lg text-[1.5rem] border border-green-300 hover:border-white hover:ring-1 ring-inset focus:outline-none  focus:border-sky-500 enabled:transition enabled:transform enabled:hover:translate-x-1 disabled:cursor-not-allowed enabled:cursor-pointer;
-  }
   a {
-    @apply text-gray-800  hover:text-slate-600;
+    @apply text-blue-500 font-black hover:underline;
   }
   li {
     @apply text-gray-800;
+  }
+  input:not([type='checkbox']) {
+    padding: 0.6rem;
+    border: 0.5px solid rgb(204, 204, 204);
+
+    transition: all 0.2s ease-in-out;
+    &:focus {
+      outline-color: rgba(201, 201, 201, 0.345);
+      transform: translate(0.6rem, 0.6rem);
+    }
+  }
+  textarea {
+    padding: 0.6rem;
+    border: 1px solid rgb(204, 204, 204);
+    box-shadow: 0.6rem 0.6rem $color-purple-4;
+
+    transition: all 0.2s ease-in-out;
+    &:focus {
+      outline-color: rgb(201, 201, 201);
+      transform: translate(0.6rem, 0.6rem);
+      box-shadow: 0 0 $color-purple-4;
+    }
   }
 }
 @layer components {
   .subscript {
     @apply text-sm text-gray-500 mx-2;
   }
+  .btn {
+    padding: 0.6rem;
+    border: 1px solid rgb(204, 204, 204);
+    transition: all 0.2s ease-in-out;
+    min-width: 10rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .btn:hover {
+    transform: translate(0.6rem, 0.6rem);
+  }
 }
-* {
-  box-sizing: border-box;
+
+@layer utilities {
+  .btn--primary {
+    box-shadow: 0.6rem 0.6rem $color-purple-2;
+    &:hover {
+      box-shadow: 0 0 $color-purple-2;
+    }
+  }
+  .btn--secondary {
+    box-shadow: 0.6rem 0.6rem $color-purple-4;
+    &:hover {
+      box-shadow: 0 0 $color-purple-4;
+    }
+  }
+  .btn--success {
+    box-shadow: 0.6rem 0.6rem $color-green-1;
+    &:hover {
+      box-shadow: 0 0 $color-green-1;
+    }
+  }
+  .btn--danger {
+    box-shadow: 0.6rem 0.6rem $color-red-1;
+    &:hover {
+      box-shadow: 0 0 $color-red-1;
+    }
+  }
+  .input--primary {
+    box-shadow: 0.6rem 0.6rem $color-purple-3;
+    &:focus {
+      box-shadow: 0 0 $color-purple-3;
+    }
+  }
+  .textarea--user,
+  .input--user {
+    box-shadow: 0.6rem 0.6rem $color-user-1;
+    &:focus {
+      box-shadow: 0 0 $color-user-1;
+    }
+  }
+  .input--secondary {
+    box-shadow: 0.6rem 0.6rem $color-purple-4;
+    &:focus {
+      box-shadow: 0 0 $color-purple-4;
+    }
+  }
+}
+*,
+::after,
+::before {
   padding: 0;
   margin: 0;
+  box-sizing: inherit;
 }
 * ::selection {
-  background: rgb(7, 97, 5) !important;
+  background: $color-green-1 !important;
+  color: $color-purple-2;
 }
 * ::-moz-selection {
-  background: #138a0f !important;
+  background: $color-green-1 !important;
+}
+body {
+  box-sizing: border-box;
+}
+html {
+  font-size: 62.5%;
+  scroll-behavior: smooth;
+}
+// For Progess Bar
+#nprogress .bar{
+  background-color: $color-green-1;
+  box-shadow:none;
+  height: 3px;
+  z-index: 1031;
+
+
+}
+#nprogress .peg{
+  box-shadow: none;
 }

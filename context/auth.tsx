@@ -1,14 +1,23 @@
 import React, { useState, createContext, useEffect } from 'react';
 import { getFetcher } from '../utils/axios/axios';
-
-export const AuthContext = createContext<any>({});
-
+import { clearAuthCookies } from '../utils/auth/cookie';
 interface AuthUser {
   isAuthenticated: boolean | null;
   email?: string;
   username?: string;
   id?: number;
+  image?: string;
 }
+
+export const AuthContext = createContext<{
+  authUser: AuthUser;
+  setAuthUser: React.Dispatch<React.SetStateAction<AuthUser>>;
+}>({
+  authUser: {
+    isAuthenticated: null,
+  },
+  setAuthUser: () => null,
+});
 
 export default function AuthContextProvider({
   children,
@@ -28,6 +37,7 @@ export default function AuthContextProvider({
       })
       .catch((err) => {
         setAuthUser({ isAuthenticated: false });
+        clearAuthCookies()
       });
   }, [authUser.isAuthenticated]);
 

@@ -31,10 +31,6 @@ const Login: NextPage = () => {
   const { authUser, setAuthUser } = useContext(AuthContext);
   const router = useRouter();
 
-  useEffect(() => {
-    setAuthUser({ isAuthenticated: false });
-    clearAuthCookies();
-  }, []);
   function updateUserState(e: any) {
     const { name, value } = e.target;
     setUserDetails({ ...userDetails, [name]: value });
@@ -77,8 +73,8 @@ const Login: NextPage = () => {
   }
 
   return (
-    <div className='m-auto h-screen flex justify-center items-center'>
-      <form className=' w-[50rem]'>
+    <div className='m-auto flex justify-center '>
+      <form className='w-[50rem] h-[85vh] flex flex-col justify-center items-center'>
         <div>
           <h1 className='text-center'>Login to share code.</h1>
         </div>
@@ -91,6 +87,7 @@ const Login: NextPage = () => {
               type='text'
               id='email'
               name='email'
+              className='input--primary'
             />
             {!_.isEmpty(error) && <Error msg={error.email} />}
           </div>
@@ -102,13 +99,18 @@ const Login: NextPage = () => {
               type='password'
               id='password'
               name='password'
+              className='input--primary'
             />
             {!_.isEmpty(error) && <Error msg={error.password} />}
             {!_.isEmpty(error) && <Error msg={error.message} />}
           </div>
         </div>
         <div className='mt-5 flex gap-5 justify-start items-center'>
-          <button onClick={handleFormSubmit} type='submit'>
+          <button
+            className='btn btn--success'
+            onClick={handleFormSubmit}
+            type='submit'
+          >
             Login
           </button>
           <div className='flex gap-5'>

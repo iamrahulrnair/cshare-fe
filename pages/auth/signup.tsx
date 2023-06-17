@@ -98,6 +98,7 @@ const Signup: NextPage = () => {
             <span className='subscript'>(optional)</span>
           </label>
           <input
+            className='input--primary'
             value={userDetails.first_name}
             onChange={updateUserState}
             type='text'
@@ -110,6 +111,7 @@ const Signup: NextPage = () => {
             Last name<span className='subscript'>(optional)</span>
           </label>
           <input
+            className='input--primary'
             onChange={updateUserState}
             type='text'
             id='lname'
@@ -120,6 +122,7 @@ const Signup: NextPage = () => {
         <div className='flex flex-col justify-between my-5 space-y-4'>
           <label htmlFor='uname'>Username </label>
           <input
+            className='input--primary'
             autoComplete='email'
             value={userDetails.username}
             onChange={updateUserState}
@@ -132,6 +135,7 @@ const Signup: NextPage = () => {
         <div className='flex flex-col justify-between my-5 space-y-4'>
           <label htmlFor='email'>Email</label>
           <input
+            className='input--primary'
             value={userDetails.email}
             onChange={updateUserState}
             type='text'
@@ -143,6 +147,7 @@ const Signup: NextPage = () => {
         <div className='flex flex-col justify-between my-5 space-y-4'>
           <label htmlFor='pwd1'>Password </label>
           <input
+            className='input--primary'
             autoComplete='new-password'
             value={userDetails.password}
             onChange={updateUserState}
@@ -155,6 +160,7 @@ const Signup: NextPage = () => {
         <div className='flex flex-col justify-between my-5 space-y-4'>
           <label htmlFor='pwd2'>Confirm password</label>
           <input
+            className='input--primary'
             autoComplete='new-password'
             value={userDetails.password2}
             onChange={updateUserState}
@@ -165,12 +171,16 @@ const Signup: NextPage = () => {
           {!_.isEmpty(error) && <Error msg={error.password2} />}
         </div>
       </div>
-      <div className=' w-full flex gap-5 justify-start items-center mb-5'>
-        <button onClick={handleFormSubmit} type='submit'>
+      <div className='mt-9 w-full flex gap-5 justify-start items-center mb-5'>
+        <button
+          className='btn btn--success mr-5'
+          onClick={handleFormSubmit}
+          type='submit'
+        >
           Signup
         </button>
         <div className='flex gap-5'>
-          <p className='cursor-pointer hover:text-green-800 underline underline-offset-4'>
+          <p className='cursor-pointer hover:text-color-purple-light underline underline-offset-4'>
             forgot password ?
           </p>
           <span>|</span>

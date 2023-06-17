@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Avatar } from 'antd';
+import { Avatar, Divider } from 'antd';
+import {
+  DeleteOutlined,
+  EditOutlined,
+  LoadingOutlined,
+  SaveFilled,
+  SaveOutlined,
+} from '@ant-design/icons';
 
-function CommentBox(props: any) {
+export function CommentBox(props: any) {
+  const [showDeleteSpinner, setShowDeleteSpinner] = useState(false);
+
   const { authUser, commentDetails, handleCommentUpdate, handleCommentDelete } =
     props;
   const [readOnlyComment, setReadOnlyComment] = useState(true);
@@ -10,25 +19,25 @@ function CommentBox(props: any) {
   const AuthUserIsOwner =
     authUser.username == commentDetails.user_details.username;
   return (
-    <div key={commentDetails.id} className='rounded-t-md my-7'>
+    <div key={commentDetails.id} className='flex flex-col gap-3 my-7'>
       <div
-        className={`flex gap-4 items-center border-2 p-4 rounded-lg border-grey-200 + ${
+        className={`flex gap-4 items-center border-2 p-4  + ${
           AuthUserIsOwner ? 'justify-end' : ''
         }`}
       >
         <div className='flex  justify-center items-center gap-5'>
           <Avatar size={50} src={commentDetails.user_details.image} />
           <div>
-            <Link href={`/${commentDetails.user_details.username}`}>
-              <span className='text-[20px]'>
+            <Link href={`/users/${commentDetails.user_details.username}`}>
+              <a className='text-[15px] text-blue-500'>
                 {commentDetails.user_details.username}
-              </span>
+              </a>
             </Link>
           </div>
           {authUser.username == commentDetails.user_details.username ? (
-            <div className='flex gap-2'>
+            <div className='flex justify-center items-center gap-2'>
               <span
-                className='hover:text-green-700 text-green-500 cursor-pointer'
+                className='cursor-pointer hover:text-blue-400'
                 onClick={() => {
                   readOnlyComment
                     ? setReadOnlyComment(false)
@@ -38,16 +47,29 @@ function CommentBox(props: any) {
                       })();
                 }}
               >
-                {readOnlyComment ? 'Edit' : 'Update'}
+                {readOnlyComment ? (
+                  <EditOutlined
+                    title='Edit comment'
+                    onClick={() => setReadOnlyComment(false)}
+                  />
+                ) : (
+                  <SaveOutlined title='Save comment' />
+                )}
               </span>
-              <strong>/</strong>
+              <Divider type='vertical' />
               <span
-                className='hover:text-red-700 text-red-500 cursor-pointer'
-                onClick={() => {
-                  handleCommentDelete(commentDetails.id);
+                className=' cursor-pointer hover:text-red-400'
+                onClick={async() => {
+                  setShowDeleteSpinner(true);
+                  await handleCommentDelete(commentDetails.id);
+                  setShowDeleteSpinner(false);
                 }}
               >
-                Delete
+                {showDeleteSpinner ? (
+                  <LoadingOutlined style={{ fontSize: 24 }} spin />
+                ) : (
+                  <DeleteOutlined title='Delete comment' />
+                )}
               </span>
             </div>
           ) : (
@@ -56,6 +78,7 @@ function CommentBox(props: any) {
         </div>
       </div>
       <textarea
+        disabled={readOnlyComment}
         defaultValue={comment}
         onChange={(e) => setComment(e.target.value)}
         readOnly={
@@ -63,10 +86,8 @@ function CommentBox(props: any) {
             ? readOnlyComment
             : true
         }
-        placeholder='Leave a comment'
-        className=' w-full p-3 placeholder-[#333333ad] outline-none border-4 border-sky-500 rounded-lg focus:border-green-400'
+        className=' w-full p-3'
       ></textarea>
     </div>
   );
 }
-export default CommentBox;

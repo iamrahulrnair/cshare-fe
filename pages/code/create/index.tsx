@@ -2,19 +2,31 @@ import { useState, useContext, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import _ from 'lodash';
 
+
+
 import { AuthContext } from '../../../context/auth';
 import { Error } from '../../../components/utils/Error';
-import CodeEditor from '../../../components/CodeEditor';
+import { CodeEditor } from '../../../components/code';
 import { getFetcher } from '../../../utils/axios/axios';
-import { AppContext, AppProps } from 'next/app';
 import { GetServerSidePropsContext } from 'next';
 import { ProtectedPageRoute } from '../../../utils/auth/session';
-import { Switch } from 'antd';
 // import { ProtectedPageRoute } from '../../../utils/auth/session';
 
-function App(pageProps: AppProps) {
-  const { authUser } = useContext(AuthContext);
-  console.log('executed');
+function App(pageProps: any) {
+  const router = useRouter();
+  const { isAuthenticated } = pageProps;
+  const { setAuthUser } = useContext(AuthContext);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setAuthUser({ isAuthenticated: false });
+      router.push(`/auth/login?next=/code/create`);
+    }
+    
+  }, []);
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const [error, setError] = useState<any>({
     code: '',
@@ -26,7 +38,6 @@ function App(pageProps: AppProps) {
     code: undefined,
     is_public: false,
   });
-  const router = useRouter();
 
   function handleCodeUpdate(e: any) {
     setError({ code: '', description: '' });
@@ -79,7 +90,7 @@ function App(pageProps: AppProps) {
             onChange={handleCodeUpdate}
             value={codeDetails.extension}
             placeholder='Filename including extension...'
-            className='w-[200px]'
+            className='min-w-[25rem] mb-3'
           />
         </div>
         <CodeEditor
@@ -89,7 +100,7 @@ function App(pageProps: AppProps) {
         />
       </div>
       {!_.isEmpty(error.code) && <Error msg={error.code} />}
-      <div className='self-end'>
+      <div className='flex items-center  self-end'>
         <label htmlFor='code'>
           Note: This is will be a &nbsp;
           <span className='font-extrabold'>
@@ -108,7 +119,7 @@ function App(pageProps: AppProps) {
           onChange={handleCodeUpdate}
           type='checkbox'
         ></input>
-        <button className='mx-5' onClick={handleCodeSubmit}>
+        <button className='mx-5 btn btn--success' onClick={handleCodeSubmit}>
           Contribute to cshare
         </button>
       </div>

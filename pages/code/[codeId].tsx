@@ -1,73 +1,81 @@
 import { GetServerSidePropsContext, NextPage } from 'next';
 import React, { useEffect, useState, useContext, useRef } from 'react';
-import axios from 'axios';
 import { Modal, Divider } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 const { confirm } = Modal;
 
 import { AuthContext } from '../../context/auth';
-import CodeEditor from '../../components/CodeEditor';
+import { CodeEditor } from '../../components/code';
 import { useRouter } from 'next/router';
-import CommentBox from '../../components/CommentBox';
-import { ProtectedPageRoute } from '../../utils/auth/session';
+import { CommentBox } from '../../components/comment';
 import { getFetcher } from '../../utils/axios/axios';
+import { toast } from 'react-toastify';
+import { useSelector } from 'react-redux';
+import {
+  fetchComments,
+  addComment,
+  updateComment,
+  removeComment,
+} from '../../store/actions';
+import { useThunk } from '../../hooks';
+import { clearAuthCookies } from '../../utils/auth/cookie';
 
 const CodeDetail: NextPage = (props: any) => {
-  const { authUser } = useContext(AuthContext);
-  const { codeDetails, comments } = props.data;
-  const [userComments, setUserComments] = useState(comments);
+  const { codeDetails } = props.data;
+  const { isAuthenticated } = props;
+
+  const { authUser, setAuthUser } = useContext(AuthContext);
   const [readOnly, setReadOnly] = useState(true);
   const [comment, setComment] = useState('');
   const router = useRouter();
 
+  const { data: comments } = useSelector<
+    { comments: { data: any[] } },
+    { data: any[] }
+  >((state) => state.comments);
+
+  const [doFetchComments] = useThunk(fetchComments);
+  const [doAddComment, addCommentsError] = useThunk(addComment);
+  const [doUpdateComment, updateCommentsError] = useThunk(updateComment);
+  const [doRemoveComment, removeCommentsError] = useThunk(removeComment);
+
   const COMMENT_PATH = `code/${codeDetails.id}/comments/`;
   const matchCode = authUser.username + '/' + codeDetails.extension;
 
-  console.log(props);
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setAuthUser({ isAuthenticated: false });
+    }
+    doFetchComments(codeDetails.id);
+  }, []);
 
-  const onSubmitComment = async () => {
-    const axiosInstance = getFetcher();
+  if (
+    addCommentsError?.message == 'Request failed with status code 401' ||
+    updateCommentsError?.message == 'Request failed with status code 401' ||
+    removeCommentsError?.message == 'Request failed with status code 401'
+  ) {
+    window.location.href = `/auth/login?next=/code/${codeDetails.id}`;
+    return;
+  }
 
-    try {
-      const response = await axiosInstance.post(COMMENT_PATH, {
-        comment,
-      });
-      setUserComments([...userComments, response.data]);
+  const handleCommentCreate = async () => {
+    doAddComment({ comment, codeId: codeDetails.id }, (result) => {
       setComment('');
-    } catch (err: any) {
-      console.log(err);
-    }
+    });
   };
+
   const handleCommentUpdate = async (id: string, comment: string) => {
-    try {
-      const response = await axios.patch(
-        `http://127.0.0.1:8000/api/code/comment/${id}/`,
-        {
-          comment,
-        },
-        {
-          withCredentials: true,
-        }
-      );
-      const currentComments = userComments;
-      currentComments[userComments.findIndex((p: any) => p.id == id)].comment =
-        response.data.comment;
-      setUserComments([...currentComments]);
-    } catch (err) {
-      console.log(err);
-    }
+    doUpdateComment({ comment, codeId: codeDetails.id, commentId: id });
   };
+
   const handleCommentDelete = async (id: string) => {
-    try {
-      await axios.delete(`http://127.0.0.1:8000/api/code/comment/${id}/`, {
-        withCredentials: true,
-      });
-      let currentComments = userComments;
-      currentComments = currentComments.filter((c: any) => c.id != id);
-      setUserComments([...currentComments]);
-    } catch (err) {}
+    doRemoveComment({ codeId: codeDetails.id, commentId: id });
   };
+
+  // FOR CODE
+
   const handleDelete = () => {
+    const axiosInstance = getFetcher();
     const model = confirm({
       title: 'Do you want to delete this code block?',
       icon: <ExclamationCircleOutlined />,
@@ -76,6 +84,7 @@ const CodeDetail: NextPage = (props: any) => {
       okButtonProps: {
         disabled: true,
       },
+      width: 700,
       content: (
         <div>
           <p>
@@ -92,7 +101,7 @@ const CodeDetail: NextPage = (props: any) => {
             }}
             name='deleteCode'
             type='text'
-            className='w-full'
+            className='w-full input--user'
           ></input>
         </div>
       ),
@@ -100,41 +109,56 @@ const CodeDetail: NextPage = (props: any) => {
         return new Promise((resolve, reject) => {
           (async () => {
             try {
-              const res = await axios.delete(
-                `http://127.0.0.1:8000/api/code/${codeDetails.id}/`,
-                {
-                  withCredentials: true,
-                }
-              );
+              const res = await axiosInstance.delete(`code/${codeDetails.id}/`);
               resolve(res);
               router.push('/');
+              toast.success('Code deleted successfully');
             } catch (err: any) {
               reject(err);
+              if (err.response.status == 401) {
+                router.push(`/auth/login?next=/code/${codeDetails.id}`);
+                return;
+              }
+              toast.error('Something went wrong');
             }
           })();
         }).catch((err) => console.log(err));
       },
       onCancel() {},
+
+      style: {
+        top: '50%',
+        transform: 'translateY(-50%)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexDirection: 'column',
+      },
+      bodyStyle: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '30rem',
+      },
     });
   };
+
+  function handleCopy() {}
+
   const handleCodeUpdate = async (code: string) => {
     codeDetails.code = code;
   };
   const handleCodePatch = async () => {
-    const code = JSON.stringify(codeDetails.code);
+    const code = codeDetails.code;
+    const axiosInstance = getFetcher();
     try {
-      const response = await axios.patch(
-        `http://127.0.0.1:8000/api/code/${codeDetails.id}/`,
-        {
-          code,
-        },
-        {
-          withCredentials: true,
-        }
-      );
-      console.log(response);
+      await axiosInstance.patch(`code/${codeDetails.id}/`, {
+        code,
+      });
+      toast.success('Code updated successfully');
     } catch (err: any) {
       console.log(err);
+      router.push(`/auth/login?next=/code/${codeDetails.id}`);
     }
   };
 
@@ -146,7 +170,6 @@ const CodeDetail: NextPage = (props: any) => {
           <div>
             <div className='flex justify-center items-center gap-2'>
               <span
-                className='hover:text-green-700 text-green-600 cursor-pointer'
                 onClick={() =>
                   readOnly
                     ? setReadOnly(false)
@@ -168,9 +191,9 @@ const CodeDetail: NextPage = (props: any) => {
               <Divider type='vertical' />
               <span
                 className='hover:text-red-700 text-blue-500 cursor-pointer'
-                // onClick={handleDelete}
+                onClick={handleCopy}
               >
-                Fork
+                Copy
               </span>
             </div>
           </div>
@@ -178,7 +201,7 @@ const CodeDetail: NextPage = (props: any) => {
           <div>
             <span
               className='hover:text-red-700 text-blue-500 cursor-pointer'
-              // onClick={handleDelete}
+              onClick={handleCopy}
             >
               Copy
             </span>
@@ -187,55 +210,76 @@ const CodeDetail: NextPage = (props: any) => {
       </div>
       <div>
         <CodeEditor
-          options={{ readOnly, minimap: { enabled: false }, outerHeight: 500 }}
+          options={{ readOnly, outerHeight: 500 }}
           handleCodeUpdate={handleCodeUpdate}
           codeDetails={codeDetails}
+          language={codeDetails.extension.split('.').pop()}
         />
       </div>
-      <div className='my-8 py-8 flex flex-col justify-center border-4 p-4 rounded-lg border-grey-400 '>
-        <div className='bg-slate-300  rounded-t-md '>
-          <p className='p-3'>Share what u express by writing a comment</p>
+      <div className='my-8 py-8 flex flex-col justify-center border-2  p-10'>
+        <div className='bg-slate-300'>
+          <p className='p-5 text-center'>
+            Share what u express by writing a comment
+          </p>
         </div>
-        {userComments.length > 0 ? (
-          userComments.map((el: any, index) => {
-            return (
-              <React.Fragment key={index}>
-                <CommentBox
-                  commentDetails={el}
-                  authUser={authUser}
-                  handleCommentUpdate={handleCommentUpdate}
-                  handleCommentDelete={handleCommentDelete}
-                />
-              </React.Fragment>
-            );
-          })
+        {comments.length > 0 ? (
+          comments.map(
+            (
+              comment: {
+                id: number;
+                comment: string;
+                user_details: {
+                  username: string;
+                  email: string;
+                  image: string;
+                };
+              },
+              index
+            ) => {
+              return (
+                <React.Fragment key={index}>
+                  <CommentBox
+                    commentDetails={comment}
+                    authUser={authUser}
+                    handleCommentUpdate={handleCommentUpdate}
+                    handleCommentDelete={handleCommentDelete}
+                  />
+                </React.Fragment>
+              );
+            }
+          )
         ) : (
           <Divider plain>No comments</Divider>
         )}
-        <div>
-          <textarea
-            placeholder='Leave a comment'
-            rows={4}
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            className='bg-slate-100 w-full p-3 placeholder-[#333333ad] min-h-[100px] outline-none border-4 border-sky-200 rounded-lg focus:border-green-400'
-          />
-        </div>
-        <div className='self-end'>
-          <button
-            className={'enabled:hover:bg-blue-100'}
-            disabled={comment.length == 0 ? true : false}
-            onClick={onSubmitComment}
-          >
-            Comment
-          </button>
-        </div>
+        {authUser.isAuthenticated && (
+          <>
+            <div className='mb-10'>
+              <textarea
+                placeholder='Leave a comment'
+                rows={4}
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                className='w-full textarea--user'
+              />
+            </div>
+            <div className='self-end'>
+              <button
+                className='btn btn--primary'
+                disabled={comment.length == 0 ? true : false}
+                onClick={handleCommentCreate}
+              >
+                Comment
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
 };
+
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-  return ProtectedPageRoute(ctx, null, async () => {
+  try {
     const axiosInstance = getFetcher(ctx.req);
     const { params } = ctx;
     const {
@@ -243,11 +287,37 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     } = await axiosInstance.get(`code/${params.codeId}/`);
 
     return {
-      data: {
-        codeDetails: data.code,
-        comments: data.comments,
+      props: {
+        data: {
+          codeDetails: data.code,
+          comments: data.comments,
+          isAuthenticated: true,
+        },
       },
     };
-  });
+  } catch (err) {
+    // if token expired or user is not authenticated
+    if (err.response.status === 401) {
+      const { params } = ctx;
+      const axiosInstance = getFetcher(ctx.req, false);
+      const {
+        data: { data },
+      } = await axiosInstance.get(`code/${params.codeId}/`);
+
+      return {
+        props: {
+          data: {
+            codeDetails: data.code,
+            comments: data.comments,
+            isAuthenticated: false,
+          },
+        },
+      };
+    }
+
+    return {
+      notFound: true,
+    };
+  }
 }
 export default CodeDetail;

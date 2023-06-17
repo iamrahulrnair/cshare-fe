@@ -88,11 +88,11 @@ export const getFetcher = (
               });
           } else {
             console.log('Refresh token is expired', token_parts.exp, now);
-            return Promise.reject('Refresh token is expired');
+            return Promise.reject(error);
           }
         } else {
           console.log('Refresh token not available.');
-          return Promise.reject('Refresh token not available.');
+          return Promise.reject(error);
         }
       }
       return Promise.reject(error);

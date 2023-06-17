@@ -6,7 +6,7 @@ interface authCookies {
 }
 
 export function parseCookies(req: any | null = null) {
-  return cookie.parse(req ? req.headers.cookie : document.cookie);
+  return cookie.parse(req ? req.headers.cookie || '' : document.cookie || '');
 }
 
 export function saveTokensAsCookie(values: authCookies) {

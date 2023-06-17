@@ -10,7 +10,6 @@ export async function ProtectedPageRoute(
   try {
     const axiosInstance = getFetcher(context.req);
     const res = await axiosInstance.get('account/isauth');
-    console.log(res.data);
 
     if (getProps) {
       return {
@@ -19,13 +18,15 @@ export async function ProtectedPageRoute(
     }
 
     return {
-      props: {},
+      props: {
+        isAuthenticated: true,
+      },
     };
   } catch (err) {
+    console.log(err);
     return {
-      redirect: {
-        destination: redirectTo ?? '/auth/login?next=/code/create',
-        permanent: false,
+      props: {
+        isAuthenticated: false,
       },
     };
   }

@@ -1,7 +1,12 @@
 import { GetServerSidePropsContext, NextPage } from 'next';
 import React, { useEffect, useState, useContext, useRef } from 'react';
-import { Modal, Divider } from 'antd';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { Modal, Divider, Select, Button } from 'antd';
+import {
+  CheckOutlined,
+  CopyOutlined,
+  ExclamationCircleOutlined,
+  ShareAltOutlined,
+} from '@ant-design/icons';
 const { confirm } = Modal;
 
 import { AuthContext } from '../../context/auth';
@@ -18,37 +23,47 @@ import {
   removeComment,
 } from '../../store/actions';
 import { useThunk } from '../../hooks';
-import { clearAuthCookies } from '../../utils/auth/cookie';
+import { DebounceSelect } from '../../components/utils/DebounceSelect';
 
 const CodeDetail: NextPage = (props: any) => {
+  const { role: userRole, type: codeType } = props.meta;
+  const BASE_URL = props.base_url;
   const { codeDetails } = props.data;
-  const { isAuthenticated } = props;
+  const router = useRouter();
 
   const { authUser, setAuthUser } = useContext(AuthContext);
   const [readOnly, setReadOnly] = useState(true);
   const [comment, setComment] = useState('');
-  const router = useRouter();
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [userSearchValues, setUserSearchValues] = useState([]);
+  const [userSearchItems, setUserSearchItems] = useState([]);
+  const [usersRole, setUsersRole] = useState('viewer');
+  const [userShareToken, setUserShareToken] = useState(null);
+
+  const CODE_OWNER = authUser.email == codeDetails.user_details.email;
+  const PRIMARY_PREVILAGE =
+    codeType == 'shareable' && userRole == 'editor' && authUser.isAuthenticated;
 
   const { data: comments } = useSelector<
     { comments: { data: any[] } },
     { data: any[] }
   >((state) => state.comments);
-
   const [doFetchComments] = useThunk(fetchComments);
   const [doAddComment, addCommentsError] = useThunk(addComment);
   const [doUpdateComment, updateCommentsError] = useThunk(updateComment);
   const [doRemoveComment, removeCommentsError] = useThunk(removeComment);
 
-  const COMMENT_PATH = `code/${codeDetails.id}/comments/`;
-  const matchCode = authUser.username + '/' + codeDetails.extension;
-
   useEffect(() => {
-    if (!isAuthenticated) {
-      setAuthUser({ isAuthenticated: false });
-    }
     doFetchComments(codeDetails.id);
   }, []);
 
+  if (authUser.isAuthenticated === false && router.query._share_id) {
+    if (window !== undefined) {
+      window.location.href = `/auth/login?next=/code/${codeDetails.id}?_share_id=${router.query._share_id}`;
+    }
+  }
   if (
     addCommentsError?.message == 'Request failed with status code 401' ||
     updateCommentsError?.message == 'Request failed with status code 401' ||
@@ -88,12 +103,16 @@ const CodeDetail: NextPage = (props: any) => {
       content: (
         <div>
           <p>
-            Type in the name <strong>{matchCode}</strong> to confirm deletion.
-            This action cannot be undone.
+            Type in the name{' '}
+            <strong>{authUser.username + '/' + codeDetails.extension}</strong>{' '}
+            to confirm deletion. This action cannot be undone.
           </p>
           <input
             onChange={(e) => {
-              if (e.target.value === matchCode) {
+              if (
+                e.target.value ===
+                authUser.username + '/' + codeDetails.extension
+              ) {
                 model.update({ okButtonProps: { disabled: false } });
               } else {
                 model.update({ okButtonProps: { disabled: true } });
@@ -143,33 +162,101 @@ const CodeDetail: NextPage = (props: any) => {
     });
   };
 
-  function handleCopy() {}
+  const handleCodeUpdate = async (code: string) => (codeDetails.code = code);
 
-  const handleCodeUpdate = async (code: string) => {
-    codeDetails.code = code;
-  };
   const handleCodePatch = async () => {
     const code = codeDetails.code;
     const axiosInstance = getFetcher();
+    const req_path = router.query._share_id
+      ? `code/${codeDetails.id}/?_share_id=${router.query._share_id}`
+      : `code/${codeDetails.id}/`;
     try {
-      await axiosInstance.patch(`code/${codeDetails.id}/`, {
+      await axiosInstance.patch(req_path, {
         code,
       });
       toast.success('Code updated successfully');
+      setCopySuccess(false);
     } catch (err: any) {
       console.log(err);
       router.push(`/auth/login?next=/code/${codeDetails.id}`);
     }
   };
 
+  function handleCopy(newClip: string) {
+    navigator.clipboard.writeText(newClip).then(
+      () => {
+        setCopySuccess(true);
+      },
+      () => {
+        setCopySuccess(false);
+      }
+    );
+  }
+  const handleShare = () => setShareModalOpen(true);
+  const shareModalHandleCancel = () => setShareModalOpen(false);
+
+  async function shareModalHandleOk() {
+    const parsedPayload = {
+      code: codeDetails.id,
+      role: usersRole,
+      users_to_share: userSearchValues.map((user) => {
+        return user.value;
+      }),
+    };
+    if (parsedPayload.users_to_share.length == 0) {
+      toast.error('Please select atleast one user');
+      return;
+    }
+
+    const axiosInstance = getFetcher();
+    setConfirmLoading(true);
+    try {
+      const response = await axiosInstance.post(`code/share/`, parsedPayload);
+      setConfirmLoading(false);
+      setUserShareToken(response.data.token);
+      console.log(response.data);
+    } catch (err) {
+      setConfirmLoading(false);
+      if (err.response.status == 401) {
+        router.push(`/auth/login?next=/code/${codeDetails.id}`);
+        return;
+      }
+      console.log(err);
+    }
+  }
+  const handleUserSearch = (value): Promise<any> => {
+    const axiosInstance = getFetcher(null, false);
+    return axiosInstance
+      .get<
+        {
+          id: number;
+          username: string;
+          image: string;
+        }[]
+      >(`core/search?users=${value}`)
+      .then((res) => {
+        setUserSearchItems(res.data);
+        return res.data.map((user) => ({
+          label: user.username,
+          value: user.id,
+        }));
+      })
+      .catch((err) => console.log(err));
+  };
+
+  if(!authUser.isAuthenticated && router.query._share_id){
+    return null
+  }
+
   return (
     <div className='mx-[120px] my-[auto] py-10'>
       <div className=' bg-slate-300 px-3 py-4 rounded-t-md flex gap-4'>
         <p className='mx-5'>{codeDetails.description}</p>
-        {authUser.email == codeDetails.user_details.email ? (
+        {CODE_OWNER || PRIMARY_PREVILAGE ? (
           <div>
             <div className='flex justify-center items-center gap-2'>
               <span
+                className='hover:text-blue-700 text-blue-500 cursor-pointer'
                 onClick={() =>
                   readOnly
                     ? setReadOnly(false)
@@ -182,28 +269,134 @@ const CodeDetail: NextPage = (props: any) => {
                 {readOnly ? 'Edit' : 'Update'}
               </span>
               <Divider type='vertical' />
+              {CODE_OWNER && (
+                <>
+                  <span
+                    className='hover:text-red-700 text-red-500 cursor-pointer'
+                    onClick={handleDelete}
+                  >
+                    Delete
+                  </span>
+                  <Divider type='vertical' />
+                </>
+              )}
               <span
-                className='hover:text-red-700 text-red-500 cursor-pointer'
-                onClick={handleDelete}
+                className='hover:text-blue-700 text-blue-500 cursor-pointer  flex items-center gap-2'
+                onClick={() => handleCopy(codeDetails.code)}
               >
-                Delete
+                {copySuccess ? 'Copied' : 'Copy'}
+                {copySuccess ? (
+                  <CheckOutlined className='text-gray-900' />
+                ) : (
+                  <CopyOutlined className='text-gray-900' />
+                )}
               </span>
-              <Divider type='vertical' />
-              <span
-                className='hover:text-red-700 text-blue-500 cursor-pointer'
-                onClick={handleCopy}
+              {CODE_OWNER && (
+                <>
+                  <Divider type='vertical' />
+                  <span
+                    onClick={handleShare}
+                    className='hover:text-blue-700 text-blue-500 cursor-pointer flex items-center gap-2'
+                  >
+                    Share
+                    <ShareAltOutlined className='text-gray-900' />
+                  </span>
+                </>
+              )}
+              <Modal
+                title='Share code with others by assinging roles'
+                open={shareModalOpen}
+                onOk={shareModalHandleOk}
+                onCancel={shareModalHandleCancel}
+                okText='Create link'
+                footer={[
+                  <div className='flex'>
+                    <Button
+                      onClick={shareModalHandleCancel}
+                      className='btn btn--danger flex justify-center items-center m-5 text-center'
+                    >
+                      Cancel
+                    </Button>
+                    {!userShareToken ? (
+                      <Button
+                        loading={confirmLoading}
+                        onClick={shareModalHandleOk}
+                        className={`btn btn--primary flex justify-center items-center m-5 text-center`}
+                      >
+                        Create link
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => {
+                          const absoluteUrl = `${BASE_URL}/?_share_id=${userShareToken}`;
+                          handleCopy(absoluteUrl);
+                          toast.success('Link copied to clipboard');
+                        }}
+                        className='btn btn--success flex justify-center items-center m-5 text-center'
+                      >
+                        <ShareAltOutlined className='text-gray-900 text-3xl hover:text-green-700' />{' '}
+                      </Button>
+                    )}
+                  </div>,
+                ]}
               >
-                Copy
-              </span>
+                <div className='flex flex-col gap-5'>
+                  <div className='flex flex-col w-full'>
+                    <label htmlFor='user'>Add user</label>
+                    <DebounceSelect
+                      className='input--user'
+                      mode='multiple'
+                      value={userSearchValues}
+                      placeholder='Select users'
+                      fetchOptions={handleUserSearch}
+                      onChange={(newValue) => {
+                        setUserShareToken(null);
+                        setUserSearchValues(newValue);
+                      }}
+                      style={{ width: '100%' }}
+                      dropdownRender={(menu) => (
+                        <>
+                          {menu}
+                          <Divider />
+                          <div className='flex items-center gap-5 p-4'>
+                            Choose Role:
+                            <Select
+                              defaultValue='viewer'
+                              style={{ width: 120 }}
+                              allowClear
+                              value={usersRole}
+                              onChange={(value) => {
+                                setUsersRole(value);
+                              }}
+                              options={[
+                                { value: 'editor', label: 'Editor' },
+                                {
+                                  value: 'viewer',
+                                  label: 'Viewer',
+                                },
+                              ]}
+                            />
+                          </div>
+                        </>
+                      )}
+                    />
+                  </div>
+                </div>
+              </Modal>
             </div>
           </div>
         ) : (
           <div>
             <span
-              className='hover:text-red-700 text-blue-500 cursor-pointer'
-              onClick={handleCopy}
+              className='hover:text-red-700 text-blue-500 cursor-pointer  flex items-center gap-2'
+              onClick={() => handleCopy(codeDetails.code)}
             >
-              Copy
+              {copySuccess ? 'Copied' : 'Copy'}
+              {copySuccess ? (
+                <CheckOutlined className='text-gray-900' />
+              ) : (
+                <CopyOutlined className='text-gray-900' />
+              )}
             </span>
           </div>
         )}
@@ -279,20 +472,30 @@ const CodeDetail: NextPage = (props: any) => {
 };
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
+  const req = ctx.req;
+  const _share_id = ctx.query._share_id;
+  const protocol = req.headers['x-forwarded-proto'] || 'http';
+  const host = req.headers['x-forwarded-host'] || req.headers.host;
+  const baseUrl = `${protocol}://${host}`;
   try {
     const axiosInstance = getFetcher(ctx.req);
     const { params } = ctx;
+    const req_path = _share_id
+      ? `code/${params.codeId}/?_share_id=${_share_id}`
+      : `code/${params.codeId}/`;
     const {
       data: { data },
-    } = await axiosInstance.get(`code/${params.codeId}/`);
-
+    } = await axiosInstance.get(req_path);
+    const absoluteUrl = new URL(`/code/${data.code.id}`, baseUrl);
+    // We dont know if the user is authenticated or not, since it can be a public as well as private code.
     return {
       props: {
         data: {
           codeDetails: data.code,
           comments: data.comments,
-          isAuthenticated: true,
         },
+        base_url: absoluteUrl.href,
+        meta: data.meta,
       },
     };
   } catch (err) {
@@ -300,19 +503,27 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     if (err.response.status === 401) {
       const { params } = ctx;
       const axiosInstance = getFetcher(ctx.req, false);
-      const {
-        data: { data },
-      } = await axiosInstance.get(`code/${params.codeId}/`);
+      try {
+        const {
+          data: { data },
+        } = await axiosInstance.get(`code/${params.codeId}/`);
+        const absoluteUrl = new URL(`/code/${data.code.id}`, baseUrl);
 
-      return {
-        props: {
-          data: {
-            codeDetails: data.code,
-            comments: data.comments,
-            isAuthenticated: false,
+        return {
+          props: {
+            data: {
+              codeDetails: data.code,
+              comments: data.comments,
+            },
+            base_url: absoluteUrl.href,
+            meta: data.meta,
           },
-        },
-      };
+        };
+      } catch (err) {
+        return {
+          notFound: true,
+        };
+      }
     }
 
     return {

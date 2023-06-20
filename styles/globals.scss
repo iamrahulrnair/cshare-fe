@@ -34,6 +34,12 @@
       transform: translate(0.6rem, 0.6rem);
     }
   }
+  input[type='search']{
+    &:focus {
+      outline-color: rgba(201, 201, 201, 0.345);
+      transform: none;
+    }
+  }
   textarea {
     padding: 0.6rem;
     border: 1px solid rgb(204, 204, 204);
@@ -132,14 +138,12 @@ html {
   scroll-behavior: smooth;
 }
 // For Progess Bar
-#nprogress .bar{
+#nprogress .bar {
   background-color: $color-green-1;
-  box-shadow:none;
+  box-shadow: none;
   height: 3px;
   z-index: 1031;
-
-
 }
-#nprogress .peg{
+#nprogress .peg {
   box-shadow: none;
 }

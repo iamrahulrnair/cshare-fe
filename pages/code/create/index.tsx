@@ -75,6 +75,7 @@ function App(pageProps: any) {
   return (
     <div className='mx-[120px] my-[auto] py-7 gap-7 flex flex-col'>
       <input
+      className='input--primary'
         name='description'
         onChange={handleCodeUpdate}
         value={codeDetails.description}
@@ -85,12 +86,13 @@ function App(pageProps: any) {
       <div className='w-[100%] h-[100%]'>
         <div className=' bg-slate-400 px-3 py-4 rounded-t-md'>
           <input
+
             type='text'
             name='extension'
             onChange={handleCodeUpdate}
             value={codeDetails.extension}
             placeholder='Filename including extension...'
-            className='min-w-[25rem] mb-3'
+            className='min-w-[25rem] mb-3 input--primary'
           />
         </div>
         <CodeEditor

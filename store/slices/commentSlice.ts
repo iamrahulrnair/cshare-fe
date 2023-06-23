@@ -18,6 +18,7 @@ const commentsSlice = createSlice({
     });
 
     builder.addCase(addComment.fulfilled, (state, action) => {
+      console.log({state,action})
       state.data.push(action.payload);
     });
 
@@ -26,11 +27,16 @@ const commentsSlice = createSlice({
       const index = state.data.findIndex((comment: any) => comment.id === id);
       state.data[index].comment = comment;
     });
-    
+
     builder.addCase(removeComment.fulfilled, (state, action) => {
-      const { id } = action.payload;
-      const index = state.data.findIndex((comment: any) => comment.id === id);
-      state.data.splice(index, 1);
+      const  id = action.payload;
+      state.data=state.data.filter((comment:any)=>{
+        console.log(comment.id)
+        return comment.id !== id
+      })
+      state.data.map((comment:any)=>{
+        console.log(comment.id)
+      })
     });
   },
 });

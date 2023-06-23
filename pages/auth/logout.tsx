@@ -15,9 +15,6 @@ function Logout() {
         const res = await axiosInstance.post('account/logout/', {
           refresh,
         });
-        // setAuthUser({
-        //   isAuthenticated: false,
-        // });
         clearAuthCookies();
         window.location.href = '/';
       } catch (err) {

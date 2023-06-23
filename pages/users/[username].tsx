@@ -6,12 +6,12 @@ import { AuthContext } from '../../context/auth';
 import Link from 'next/link';
 import { UserOutlined } from '@ant-design/icons';
 import {
+  FollowUnfollowButton,
   Followers,
   Following,
   UserCodes,
   UserEditBox,
 } from '../../components/users';
-import { unfollowUser, followUser } from '../../utils/auth';
 
 export interface UserDetails {
   id: number;
@@ -43,20 +43,18 @@ function Username({
   codes,
   isAuthenticated,
 }: UserNamePropsInterface) {
-  const router = useRouter();
   const { authUser, setAuthUser } = useContext(AuthContext);
   const [userDetails, setUserDetails] = useState<Partial<UserDetails>>({});
   const [showProfileEditOptions, setShowProfileEditOptions] = useState(false);
   const [activeKey, setActiveKey] = useState('1');
-  const [isFollowing, setIsFollowing] = useState(
-    userDetails.is_following || false
-  );
+  const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
       setAuthUser({ isAuthenticated: false });
     }
     setUserDetails(user_details);
+    setIsFollowing(user_details.is_following || false);
   }, [user_details]);
 
   function onTabChange(key: string) {
@@ -80,21 +78,7 @@ function Username({
       children: <Following user={userDetails.username} />,
     },
   ];
-  async function handleFollowUser() {
-    if (!authUser.isAuthenticated) {
-      return router.push(`/auth/login/?next=/users/${userDetails.username}`);
-    }
 
-    if (isFollowing) {
-      setIsFollowing(false);
-      await unfollowUser(userDetails.username);
-      return;
-    } else {
-      setIsFollowing(true);
-      await followUser(userDetails.username);
-      return;
-    }
-  }
 
   return (
     <section className='profile'>
@@ -135,21 +119,15 @@ function Username({
                     </>
                   ) : (
                     <>
-                      {isFollowing ? (
-                        <button
-                          onClick={handleFollowUser}
-                          className='btn btn--success hover:text-red-500 m-6'
-                        >
-                          Unfollow
-                        </button>
-                      ) : (
-                        <button
-                          className='btn btn--success hover:text-blue-500 m-6'
-                          onClick={handleFollowUser}
-                        >
-                          Follow
-                        </button>
-                      )}
+                        <FollowUnfollowButton
+                        is_following={userDetails.is_following}
+                          user={{
+                            leader_details: userDetails,
+                          }}
+                          post_save={()=>{
+                            setIsFollowing(true)
+                          }}
+                        />
                     </>
                   )}
                 </Link>

@@ -24,6 +24,7 @@ import {
 } from '../../store/actions';
 import { useThunk } from '../../hooks';
 import { DebounceSelect } from '../../components/utils/DebounceSelect';
+import Link from 'next/link';
 
 const CodeDetail: NextPage = (props: any) => {
   const { role: userRole, type: codeType } = props.meta;
@@ -146,8 +147,6 @@ const CodeDetail: NextPage = (props: any) => {
       onCancel() {},
 
       style: {
-        top: '50%',
-        transform: 'translateY(-50%)',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -244,13 +243,13 @@ const CodeDetail: NextPage = (props: any) => {
       .catch((err) => console.log(err));
   };
 
-  if(!authUser.isAuthenticated && router.query._share_id){
-    return null
+  if (!authUser.isAuthenticated && router.query._share_id) {
+    return null;
   }
 
   return (
     <div className='mx-[120px] my-[auto] py-10'>
-      <div className=' bg-slate-300 px-3 py-4 rounded-t-md flex gap-4'>
+      <div className=' bg-slate-300 px-3 py-4 rounded-t-md flex gap-4 justify-between items-center'>
         <p className='mx-5'>{codeDetails.description}</p>
         {CODE_OWNER || PRIMARY_PREVILAGE ? (
           <div>
@@ -400,6 +399,18 @@ const CodeDetail: NextPage = (props: any) => {
             </span>
           </div>
         )}
+        {codeDetails.last_updated_by && (
+          <div className='flex gap-3 p-2'>
+            <span className='text-gray-500'>last edited by:</span>
+            <span className='text-gray-900'>
+              <Link href={`/users/${codeDetails.last_updated_by}`}>
+                <a className='text-[15px] text-blue-500'>
+                  {codeDetails.last_updated_by}
+                </a>
+              </Link>
+            </span>
+          </div>
+        )}
       </div>
       <div>
         <CodeEditor
@@ -430,7 +441,7 @@ const CodeDetail: NextPage = (props: any) => {
               index
             ) => {
               return (
-                <React.Fragment key={index}>
+                <React.Fragment>
                   <CommentBox
                     commentDetails={comment}
                     authUser={authUser}

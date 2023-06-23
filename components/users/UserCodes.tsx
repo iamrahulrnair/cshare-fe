@@ -7,6 +7,7 @@ export function UserCodes({ user_details, codes }) {
   return (
     <div className='flex flex-col gap-4'>
       {codes.map((code) => (
+       <React.Fragment key={code.id}>
         <Badge.Ribbon
           text={code.is_public ? 'Public' : 'Private'}
           color={code.is_public ? '#bfdb38' : '#a5d6a7'}
@@ -41,6 +42,7 @@ export function UserCodes({ user_details, codes }) {
             </div>
           </div>
         </Badge.Ribbon>
+       </React.Fragment>
       ))}
     </div>
   );

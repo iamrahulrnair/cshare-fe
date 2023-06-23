@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { followUser, unfollowUser } from '../../utils/auth';
 import { AuthContext } from '../../context/auth';
 import { useRouter } from 'next/router';
-import { FollowButton } from './FollowButton';
-import { UnFollowButton } from './UnFollowButton';
+import { FollowUnfollowButton } from './FollowUnfollowButton';
 
 interface sample {
+  id: number;
   leader: number;
   follower: number;
   follower_details: {
@@ -53,7 +53,7 @@ export function Followers({ user }: { user: string }) {
     <div className='flex flex-col p-10'>
       {followers.map((follower) => {
         return (
-          <>
+          <React.Fragment key={follower.id}>
             <div className='flex justify-between items-center'>
               <div className='flex gap-4'>
                 <div>
@@ -79,43 +79,14 @@ export function Followers({ user }: { user: string }) {
               </div>
               <div>
                 {follower.follower_details.username !== authUser.username &&
-                  (follower.is_following ? (
-                    <UnFollowButton
+                  <FollowUnfollowButton
+                      is_following={follower.is_following}
                       user={follower}
-                      post_save={() => {
-                        const updatedFollowers = followers.map((_follower) => {
-                          if (
-                            _follower.follower_details.username ===
-                            follower.follower_details.username
-                          ) {
-                            return { ..._follower, is_following: false };
-                          }
-                          return _follower;
-                        });
-                        setFollowers(updatedFollowers);
-                      }}
-                    />
-                  ) : (
-                    <FollowButton
-                      post_save={() => {
-                        const updatedFollowers = followers.map((_follower) => {
-                          if (
-                            _follower.follower_details.username ===
-                            follower.follower_details.username
-                          ) {
-                            return { ..._follower, is_following: true };
-                          }
-                          return _follower;
-                        });
-                        setFollowers(updatedFollowers);
-                      }}
-                      user={follower}
-                    />
-                  ))}
+                    />}
               </div>
             </div>
             <Divider dashed />
-          </>
+          </React.Fragment>
         );
       })}
     </div>

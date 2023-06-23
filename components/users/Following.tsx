@@ -1,15 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { getFetcher } from '../../utils/axios/axios';
-import { set } from 'lodash';
 import { Avatar, Divider, Empty } from 'antd';
 import Link from 'next/link';
-import { followUser, unfollowUser } from '../../utils/auth';
 import { AuthContext } from '../../context/auth';
-import { useRouter } from 'next/router';
-import { LoadingOutlined } from '@ant-design/icons';
-import { FollowButton, UnFollowButton } from './';
+import { FollowUnfollowButton } from './FollowUnfollowButton';
 
 interface FollowingUsers {
+  id: number;
   leader: number;
   follower: number;
   leader_details: {
@@ -21,16 +18,13 @@ interface FollowingUsers {
   };
   is_following: boolean;
 }
-[];
 
 export function Following({ user }: { user: string }) {
   const [leaders, setLeaders] = useState<Partial<FollowingUsers[]> | []>(
     undefined
   );
   const { authUser, setAuthUser } = useContext(AuthContext);
-  const [showSpinner, setShowSpinner] = useState(false);
 
-  const router = useRouter();
 
   useEffect(() => {
     (async () => {
@@ -55,12 +49,12 @@ export function Following({ user }: { user: string }) {
       />
     );
   }
-
+  
   return (
     <div className='flex flex-col p-10'>
       {leaders.map((leader) => {
         return (
-          <>
+          <React.Fragment key={leader.id}>
             <div className='flex justify-between items-center'>
               <div className='flex gap-4'>
                 <div>
@@ -82,49 +76,15 @@ export function Following({ user }: { user: string }) {
               </div>
               <div>
                 {leader.leader_details.username !== authUser.username &&
-                  (leader.is_following ? (
-                    <UnFollowButton
+                    <FollowUnfollowButton
+                      is_following={leader.is_following}
                       user={leader}
-                      post_save={() => {
-                        const updatedLeaders = leaders.map(
-                          (_leader: FollowingUsers) => {
-                            if (
-                              _leader.leader_details.username ===
-                              leader.leader_details.username
-                            ) {
-                              return { ..._leader, is_following: false };
-                            }
-                            return _leader;
-                          }
-                        );
-                        setLeaders(
-                          updatedLeaders as Partial<FollowingUsers[]> | []
-                        );
-                      }}
                     />
-                  ) : (
-                    <FollowButton
-                      user={leader}
-                      post_save={() => {
-                        const updatedLeaders = leaders.map((_leader) => {
-                          if (
-                            _leader.leader_details.username ===
-                            leader.leader_details.username
-                          ) {
-                            return { ..._leader, is_following: true };
-                          }
-                          return _leader;
-                        });
-                        setLeaders(
-                          updatedLeaders as Partial<FollowingUsers[]> | []
-                        );
-                      }}
-                    />
-                  ))}
+                    }
               </div>
             </div>
             <Divider dashed />
-          </>
+          </React.Fragment>
         );
       })}
     </div>

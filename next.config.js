@@ -2,13 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  images: [
-    {
-      protocol: 'http',
-      hostname: '127.0.0.1',
-      port: 8000,
-    },
-  ],
+  images: {
+    domains: ["127.0.0.1", "localhost",]
+  }
 };
 
 module.exports = nextConfig;

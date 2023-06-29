@@ -16,6 +16,16 @@ function App(pageProps: any) {
   const router = useRouter();
   const { isAuthenticated } = pageProps;
   const { setAuthUser } = useContext(AuthContext);
+  const [error, setError] = useState<any>({
+    code: '',
+    description: '',
+  });
+  const [codeDetails, setCodeDetails] = useState<any>({
+    extension: '',
+    description: '',
+    code: undefined,
+    is_public: false,
+  });
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -28,16 +38,7 @@ function App(pageProps: any) {
     return null;
   }
 
-  const [error, setError] = useState<any>({
-    code: '',
-    description: '',
-  });
-  const [codeDetails, setCodeDetails] = useState<any>({
-    extension: '',
-    description: '',
-    code: undefined,
-    is_public: false,
-  });
+ 
 
   function handleCodeUpdate(e: any) {
     setError({ code: '', description: '' });

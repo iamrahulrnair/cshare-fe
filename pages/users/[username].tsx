@@ -12,6 +12,8 @@ import {
   UserCodes,
   UserEditBox,
 } from '../../components/users';
+import { set } from 'lodash';
+import Image from 'next/image';
 
 export interface UserDetails {
   id: number;
@@ -55,7 +57,7 @@ function Username({
     }
     setUserDetails(user_details);
     setIsFollowing(user_details.is_following || false);
-  }, [user_details]);
+  }, [user_details, setAuthUser, isAuthenticated]);
 
   function onTabChange(key: string) {
     setActiveKey(key);
@@ -79,13 +81,12 @@ function Username({
     },
   ];
 
-
   return (
     <section className='profile'>
       <Row className=' min-h-[80vh] p-10 relative'>
         <Col className='p-4 ' span={6}>
           <div className='flex flex-col sticky top-[35px]'>
-            <img
+            <Image
               className='rounded-full'
               src={userDetails.image}
               height={300}
@@ -119,15 +120,15 @@ function Username({
                     </>
                   ) : (
                     <>
-                        <FollowUnfollowButton
+                      <FollowUnfollowButton
                         is_following={userDetails.is_following}
-                          user={{
-                            leader_details: userDetails,
-                          }}
-                          post_save={()=>{
-                            setIsFollowing(true)
-                          }}
-                        />
+                        user={{
+                          leader_details: userDetails,
+                        }}
+                        post_save={() => {
+                          setIsFollowing(true);
+                        }}
+                      />
                     </>
                   )}
                 </Link>

@@ -58,7 +58,7 @@ const CodeDetail: NextPage = (props: any) => {
 
   useEffect(() => {
     doFetchComments(codeDetails.id);
-  }, []);
+  }, [doFetchComments, codeDetails.id]);
 
   if (authUser.isAuthenticated === false && router.query._share_id) {
     if (window !== undefined) {
@@ -309,7 +309,7 @@ const CodeDetail: NextPage = (props: any) => {
                 onCancel={shareModalHandleCancel}
                 okText='Create link'
                 footer={[
-                  <div className='flex'>
+                  <div key='1' className='flex'>
                     <Button
                       onClick={shareModalHandleCancel}
                       className='btn btn--danger flex justify-center items-center m-5 text-center'
@@ -441,7 +441,7 @@ const CodeDetail: NextPage = (props: any) => {
               index
             ) => {
               return (
-                <React.Fragment>
+                <React.Fragment key={comment.id}>
                   <CommentBox
                     commentDetails={comment}
                     authUser={authUser}

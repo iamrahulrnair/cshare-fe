@@ -63,7 +63,7 @@ function App(pageProps: any) {
       const axiosInstance = getFetcher();
       await axiosInstance.post('code/', codeDetails);
       // await axiosInstance.post('code', codeDetails);
-      // router.push('/code');
+      router.push('/code');
     } catch (err: any) {
       console.log(err.response.data);
       setError({

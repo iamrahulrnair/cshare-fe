@@ -12,6 +12,7 @@ import 'nprogress/nprogress.css';
 import 'antd/dist/antd.css';
 import '../styles/globals.scss';
 import { useEffect, useRef } from 'react';
+import Head from 'next/head';
 
 function MyApp({ Component, pageProps, router }: any) {
 
@@ -40,6 +41,9 @@ function MyApp({ Component, pageProps, router }: any) {
 
   return (
     <Provider store={store}>
+      <Head>
+      <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"/>
+      </Head>
       <AuthContextProvider>
         <NavBar  />
         <div className='max-w-[1400px] my-0 mx-auto min-h-[85vh] p-1'>

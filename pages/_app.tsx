@@ -17,7 +17,7 @@ function MyApp({ Component, pageProps, router }: any) {
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     if (window) {
-      if (window.innerWidth < 1000) {
+      if (window.screen.width < 1000) {
         setIsMobile(true);
       }
     }

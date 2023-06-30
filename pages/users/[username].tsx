@@ -4,7 +4,10 @@ import { getFetcher } from '../../utils/axios/axios';
 import { Avatar, Col, Divider, Row, Tabs, TabsProps } from 'antd';
 import { AuthContext } from '../../context/auth';
 import Link from 'next/link';
-import { UserOutlined } from '@ant-design/icons';
+import { UploadOutlined, UserOutlined } from '@ant-design/icons';
+
+import styles from './Username.module.scss';
+
 import {
   FollowUnfollowButton,
   Followers,
@@ -12,8 +15,8 @@ import {
   UserCodes,
   UserEditBox,
 } from '../../components/users';
-import { set } from 'lodash';
 import Image from 'next/image';
+import { toast } from 'react-toastify';
 
 export interface UserDetails {
   id: number;
@@ -50,6 +53,7 @@ function Username({
   const [showProfileEditOptions, setShowProfileEditOptions] = useState(false);
   const [activeKey, setActiveKey] = useState('1');
   const [isFollowing, setIsFollowing] = useState(false);
+  const [profileImage, setProfileImage] = useState<File | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -62,7 +66,23 @@ function Username({
   function onTabChange(key: string) {
     setActiveKey(key);
   }
-
+  function handleProfileImageUpload(e) {
+    if (e.target.files) {
+      setProfileImage(e.target.files[0]);
+      const formData = new FormData();
+      formData.append('image', e.target.files[0]);
+      const axiosInstance = getFetcher();
+      axiosInstance
+        .patch('account/me/', formData)
+        .then((response) => {
+          setUserDetails({ ...userDetails, image: response.data.image });
+          toast.success('Profile updated successfully');
+        })
+        .catch(() => {
+          toast.error('Error while uploading image');
+        });
+    }
+  }
   const tabItems: TabsProps['items'] = [
     {
       key: '1',
@@ -85,13 +105,42 @@ function Username({
     <section className='profile'>
       <Row className=' min-h-[80vh] p-10 relative'>
         <Col className='p-4 ' span={6}>
-          <div className='flex flex-col sticky top-[35px]'>
-            <Image
-              className='rounded-full'
-              src={userDetails.image}
-              height={300}
-              width={300}
-            />
+          <div className='flex flex-col sticky top-[35px] '>
+            <div className={`${styles.container} relative`}>
+              <Image
+                className={`rounded-full`}
+                src={userDetails.image}
+                height={300}
+                width={300}
+              />
+              {authUser.isAuthenticated &&
+                authUser.username === userDetails.username && (
+                  <div className={`${styles.overlay} cursor-pointer`}>
+                    <div className={`${styles.text}`}>
+                      <div className='relative'>
+                        <label htmlFor='upload'>
+                          <span>
+                            <UploadOutlined
+                              className='cursor-pointer'
+                              style={{
+                                fontSize: '50px',
+                              }}
+                            />
+                          </span>
+                          <input
+                            onChange={handleProfileImageUpload}
+                            type='file'
+                            id='upload'
+                            style={{
+                              display: 'none',
+                            }}
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                )}
+            </div>
             {showProfileEditOptions ? (
               <UserEditBox
                 user_details={userDetails}

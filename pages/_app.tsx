@@ -11,19 +11,26 @@ import { store } from '../store';
 import 'nprogress/nprogress.css';
 import 'antd/dist/antd.css';
 import '../styles/globals.scss';
-import { useEffect, useRef } from 'react';
-import Head from 'next/head';
+import { useEffect, useState } from 'react';
 
 function MyApp({ Component, pageProps, router }: any) {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    if (window) {
+      if (window.innerWidth < 1000) {
+        setIsMobile(true);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const handleRouteStart = () => {
       NProgress.start();
-      NProgress.set(.3);
+      NProgress.set(0.3);
       NProgress.configure({
         easing: 'ease',
-        speed:500,
-        showSpinner: false, 
+        speed: 500,
+        showSpinner: false,
       });
     };
     const handleRouteDone = () => NProgress.done();
@@ -41,22 +48,34 @@ function MyApp({ Component, pageProps, router }: any) {
 
   return (
     <Provider store={store}>
-      <Head>
-      <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests"/>
-      </Head>
       <AuthContextProvider>
-        <NavBar  />
-        <div className='max-w-[1400px] my-0 mx-auto min-h-[85vh] p-1'>
-          <Component {...pageProps} />
-        </div>
-        <Divider>
-          <p className='text-center text-gray-500'>
-            © 2023 <span className='text-gray-900 font-black'>Cshare</span> by{' '}
-            <span>
-              <a href='https://github.com/iamrahulrnair'>iamrahulrnair</a>
-            </span>
-          </p>
-        </Divider>
+        {!isMobile ? (
+          <>
+            <NavBar />
+            <div className='max-w-[1150px] my-0 mx-auto min-h-[85vh] p-1'>
+              <Component {...pageProps} />
+            </div>
+            <Divider>
+              <p className='text-center text-gray-500'>
+                © 2023 <span className='text-gray-900 font-black'>Cshare</span>{' '}
+                by{' '}
+                <span>
+                  <a href='https://github.com/iamrahulrnair'>iamrahulrnair</a>
+                </span>
+              </p>
+            </Divider>
+          </>
+        ) : (
+          <div className='h-[100vh] flex justify-center items-center flex-col'>
+            <h1 className=''>
+              <span className='font-extrabold'>Know media queries?</span>{' '}
+              <span className='font-extralight'>Fix an issue raised in 
+              <a className='ml-3' href="https://github.com/iamrahulrnair/cshare-fe">Github</a>
+              </span>
+            </h1>
+            <p className='subscript'>Please access Cshare via Laptop / Desktop</p>
+          </div>
+        )}
 
         <ToastContainer />
       </AuthContextProvider>

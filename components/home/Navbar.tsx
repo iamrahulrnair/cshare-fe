@@ -21,13 +21,13 @@ export const NavBar = function ({ ref }: any) {
         <Divider type='vertical' />
         <div className='search flex col relative'>
           <input
-            className='input--user min-w-[400px] rounded-l-[5px]'
+            className='input--user min-w-[250px] rounded-l-[5px]'
             placeholder='Search...'
             type='text'
           />
         </div>
       </div>
-      <div className='px-5 py-3 bg-slate-200 rounded-md'>
+      <div className='px-5 py-2 bg-slate-200 rounded-md'>
         <ul className='flex justify-center gap-20 text-2xl items-center'>
           {!authUser.isAuthenticated && (
             <Link href='/auth/login'>

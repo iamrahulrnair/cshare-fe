@@ -10,6 +10,8 @@ export function FollowUnfollowButton({
   save = () => {},
   post_save = () => {},
 }) {
+  console.log(user);
+  
   const [showSpinner, setShowSpinner] = useState(false);
   const [isFollowing, setIsFollowing] = useState(is_following);
   const router = useRouter();

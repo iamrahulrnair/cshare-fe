@@ -2,20 +2,19 @@ import { useState, useContext, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import _ from 'lodash';
 
-
-
 import { AuthContext } from '../../../context/auth';
 import { Error } from '../../../components/utils/Error';
 import { CodeEditor } from '../../../components/code';
 import { getFetcher } from '../../../utils/axios/axios';
 import { GetServerSidePropsContext } from 'next';
 import { ProtectedPageRoute } from '../../../utils/auth/session';
+import { toast } from 'react-toastify';
 // import { ProtectedPageRoute } from '../../../utils/auth/session';
 
 function App(pageProps: any) {
   const router = useRouter();
-  const { isAuthenticated } = pageProps;
-  const { setAuthUser } = useContext(AuthContext);
+  const { isAuthenticated,setUserVerified } = pageProps;
+  const { authUser, setAuthUser } = useContext(AuthContext);
   const [error, setError] = useState<any>({
     code: '',
     description: '',
@@ -32,13 +31,19 @@ function App(pageProps: any) {
       setAuthUser({ isAuthenticated: false });
       router.push(`/auth/login?next=/code/create`);
     }
-    
   }, []);
+  useEffect(() => {
+    if (authUser.isAuthenticated) {
+      if (authUser.is_verified) {
+        setUserVerified(true);
+      } else {
+        setUserVerified(false);
+      }
+    }
+  }, [authUser]);
   if (!isAuthenticated) {
     return null;
   }
-
- 
 
   function handleCodeUpdate(e: any) {
     setError({ code: '', description: '' });
@@ -63,6 +68,7 @@ function App(pageProps: any) {
       const axiosInstance = getFetcher();
       await axiosInstance.post('code/', codeDetails);
       // await axiosInstance.post('code', codeDetails);
+      toast.success('Code block created successfully');
       router.push('/');
     } catch (err: any) {
       console.log(err.response.data);
@@ -76,7 +82,7 @@ function App(pageProps: any) {
   return (
     <div className='mx-[120px] my-[auto] py-7 gap-7 flex flex-col'>
       <input
-      className='input--primary'
+        className='input--primary'
         name='description'
         onChange={handleCodeUpdate}
         value={codeDetails.description}
@@ -87,7 +93,6 @@ function App(pageProps: any) {
       <div className='w-[100%] h-[100%]'>
         <div className=' bg-slate-400 px-3 py-4 rounded-t-md'>
           <input
-
             type='text'
             name='extension'
             onChange={handleCodeUpdate}
@@ -122,7 +127,11 @@ function App(pageProps: any) {
           onChange={handleCodeUpdate}
           type='checkbox'
         ></input>
-        <button className='mx-5 btn btn--success' onClick={handleCodeSubmit}>
+        <button
+          disabled={authUser.is_verified == false}
+          className='mx-5 btn btn--success'
+          onClick={handleCodeSubmit}
+        >
           Contribute to cshare
         </button>
       </div>

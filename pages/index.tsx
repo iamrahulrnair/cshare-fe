@@ -1,11 +1,12 @@
 import type { NextPage } from 'next';
-import {CodeBlock} from '../components/code';
+import { CodeBlock } from '../components/code';
 
 import _ from 'lodash';
 import Link from 'next/link';
 import { getFetcher } from '../utils/axios/axios';
-import { useEffect } from 'react';
-import { Col, Row, Avatar, Divider } from 'antd';
+import { useContext, useEffect } from 'react';
+import { Avatar, Divider } from 'antd';
+import { AuthContext } from '../context/auth';
 
 interface codeDetailsProps {
   id: number;
@@ -24,13 +25,18 @@ interface codeDetailsProps {
   };
 }
 
-const Home = ({
-  authUser,
-  data,
-}: {
-  authUser: any;
-  data: codeDetailsProps[];
-}) => {
+const Home = (props: any) => {
+  const { authUser } = useContext(AuthContext);
+  const { data, setUserVerified } = props;
+  useEffect(() => {
+    if (authUser.isAuthenticated) {
+      if (authUser.is_verified) {
+        setUserVerified(true);
+      } else {
+        setUserVerified(false);
+      }
+    }
+  }, [authUser]);
   return (
     data.length > 0 &&
     data.map((code: codeDetailsProps, index) => {

@@ -57,7 +57,6 @@ const Signup: NextPage = () => {
           pending: 'Signing in...',
           success: {
             render: ({ data }: any) => {
-              console.log(data);
               return `Hey there, Welcome to cshare.`;
             },
           },

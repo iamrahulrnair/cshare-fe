@@ -1,9 +1,22 @@
-import { Avatar, Badge } from 'antd';
+import { Avatar, Badge, Empty } from 'antd';
 import Link from 'next/link';
 import React from 'react';
 import { CodeBlock } from '../code';
 
 export function UserCodes({ user_details, codes }) {
+  if (codes.length === 0) {
+    return (
+      <Empty
+        className='flex flex-col min-h-[50vh] justify-center border-black'
+        description='No Code available'
+        children={
+          <Link href='/code/create'>
+            <a>create</a>
+          </Link>
+        }
+      />
+    );
+  }
   return (
     <div className='flex flex-col gap-4'>
       {codes.map((code) => (

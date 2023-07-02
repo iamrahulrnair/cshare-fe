@@ -41,12 +41,14 @@ interface UserNamePropsInterface {
     is_public: boolean;
   }[];
   isAuthenticated: boolean;
+  setUserVerified: (value: boolean) => void;
 }
 
 function Username({
   user_details,
   codes,
   isAuthenticated,
+  setUserVerified
 }: UserNamePropsInterface) {
   const { authUser, setAuthUser } = useContext(AuthContext);
   const [userDetails, setUserDetails] = useState<Partial<UserDetails>>({});
@@ -63,9 +65,20 @@ function Username({
     setIsFollowing(user_details.is_following || false);
   }, [user_details, setAuthUser, isAuthenticated]);
 
+  useEffect(() => {
+    if (authUser.isAuthenticated) {
+      if (authUser.is_verified) {
+        setUserVerified(true);
+      } else {
+        setUserVerified(false);
+      }
+    }
+  }, [authUser]);
+
   function onTabChange(key: string) {
     setActiveKey(key);
   }
+  
   function handleProfileImageUpload(e) {
     if (e.target.files) {
       setProfileImage(e.target.files[0]);
@@ -162,7 +175,8 @@ function Username({
                     <>
                       <button
                         onClick={() => setShowProfileEditOptions(true)}
-                        className='btn btn--success m-6'
+                        className='btn btn--success m-6 cursor-pointer'
+                        disabled={authUser.is_verified == false}
                       >
                         Edit profile
                       </button>

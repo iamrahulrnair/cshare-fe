@@ -30,6 +30,7 @@ const CodeDetail: NextPage = (props: any) => {
   const { role: userRole, type: codeType } = props.meta;
   const BASE_URL = props.base_url;
   const { codeDetails } = props.data;
+  const { setUserVerified } = props;
   const router = useRouter();
 
   const { authUser, setAuthUser } = useContext(AuthContext);
@@ -59,6 +60,16 @@ const CodeDetail: NextPage = (props: any) => {
   useEffect(() => {
     doFetchComments(codeDetails.id);
   }, [doFetchComments, codeDetails.id]);
+
+  useEffect(() => {
+    if (authUser.isAuthenticated) {
+      if (authUser.is_verified) {
+        setUserVerified(true);
+      } else {
+        setUserVerified(false);
+      }
+    }
+  }, [authUser]);
 
   if (authUser.isAuthenticated === false && router.query._share_id) {
     if (window !== undefined) {
@@ -469,7 +480,7 @@ const CodeDetail: NextPage = (props: any) => {
             <div className='self-end'>
               <button
                 className='btn btn--primary'
-                disabled={comment.length == 0 ? true : false}
+                disabled={comment.length == 0 ? true : false || authUser.is_verified == false}
                 onClick={handleCommentCreate}
               >
                 Comment

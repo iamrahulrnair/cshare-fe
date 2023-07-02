@@ -7,6 +7,7 @@ interface AuthUser {
   username?: string;
   id?: number;
   image?: string;
+  is_verified?: boolean;
 }
 
 export const AuthContext = createContext<{

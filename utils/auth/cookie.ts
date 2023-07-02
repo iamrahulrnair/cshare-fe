@@ -12,7 +12,6 @@ export function parseCookies(req: any | null = null) {
 export function saveTokensAsCookie(values: authCookies) {
   if (values.access_token) {
     const _cookie = cookie.serialize('access_token', values.access_token, {
-      domain: process.env.NEXT_PUBLIC_DOMAIN,
       path: '/',
       expires: new Date(Date.now() + 60 * 1000 * 60 * 24),
       sameSite: 'lax',
@@ -22,7 +21,6 @@ export function saveTokensAsCookie(values: authCookies) {
   }
   if (values.refresh_token) {
     const _cookie = cookie.serialize('refresh_token', values.refresh_token, {
-      domain: process.env.NEXT_PUBLIC_DOMAIN,
       path: '/',
       expires: new Date(Date.now() + 60 * 1000 * 60 * 24),
       sameSite: 'lax',

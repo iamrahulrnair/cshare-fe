@@ -9,12 +9,11 @@ export function UserCodes({ user_details, codes }) {
       <Empty
         className='flex flex-col min-h-[50vh] justify-center border-black'
         description='No Code available'
-        children={
-          <Link href='/code/create'>
-            <a>create</a>
-          </Link>
-        }
-      />
+      >
+        <Link href='/code/create'>
+          <a>create</a>
+        </Link>
+      </Empty>
     );
   }
   return (

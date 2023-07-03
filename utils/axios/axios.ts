@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { NextRequest } from 'next/server';
-import { parseCookies, saveTokensAsCookie } from '../auth/cookie';
+import { getCookie, parseCookies, saveTokensAsCookie } from '../auth/cookie';
 import { IncomingMessage } from 'http';
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL || process.env.BASE_URL;
@@ -16,6 +16,7 @@ export const getFetcher = (
   protectedRoute = true
 ) => {
   // parseCookie handles ssr csr issue
+  const csrftoken = getCookie('csrftoken');
   const cookieData = parseCookies(req);
   const access_token = cookieData.access_token;
   const refresh_token = cookieData.refresh_token;
@@ -26,6 +27,11 @@ export const getFetcher = (
       ...(protectedRoute
         ? {
             Authorization: access_token ? 'Bearer ' + access_token : '',
+          }
+        : {}),
+      ...(csrftoken
+        ? {
+            'X-CSRFToken': csrftoken,
           }
         : {}),
       'Content-Type': 'application/json',

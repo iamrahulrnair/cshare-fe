@@ -31,14 +31,12 @@ export function saveTokensAsCookie(values: authCookies) {
 
 export function clearAuthCookies() {
   const _cookie = cookie.serialize('access_token', '', {
-    domain: process.env.NEXT_PUBLIC_DOMAIN,
     path: '/',
     expires: new Date(Date.now() - 1),
     sameSite: 'lax',
   });
   document.cookie = _cookie;
   const _cookie2 = cookie.serialize('refresh_token', '', {
-    domain: process.env.NEXT_PUBLIC_DOMAIN,
     path: '/',
     expires: new Date(Date.now() - 1),
     sameSite: 'lax',

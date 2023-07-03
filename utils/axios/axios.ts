@@ -17,6 +17,8 @@ export const getFetcher = (
 ) => {
   // parseCookie handles ssr csr issue
   const csrftoken = getCookie('csrftoken');
+  console.log({ csrftoken });
+  
   const cookieData = parseCookies(req);
   const access_token = cookieData.access_token;
   const refresh_token = cookieData.refresh_token;

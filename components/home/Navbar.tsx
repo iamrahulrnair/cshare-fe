@@ -40,7 +40,7 @@ export const NavBar = function ({ ref }: any) {
             </Link>
           )}
           <li>
-            <Link href='#'>
+            <Link href='/about'>
               <button className={styles.nav__btn}>About</button>
             </Link>
           </li>

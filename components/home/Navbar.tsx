@@ -19,7 +19,7 @@ export const NavBar = function ({ ref }: any) {
     >
       <div className='flex justify-center items-center sm:gap-10'>
         <Link href='/'>
-          <h1 className='text-[4rem] cursor-pointer hover:text-slate-600'>
+          <h1 className='text-[2rem] sm:text-[4rem] cursor-pointer hover:text-slate-600'>
             Cshare
           </h1>
         </Link>
@@ -108,7 +108,7 @@ export const NavBar = function ({ ref }: any) {
       </div>
       {authUser.isAuthenticated && (
         <Menu
-          className='rounded-[5px] flex justify-center items-center sm:hidden'
+          className='rounded-[5px] w-[200px] flex justify-center items-center sm:hidden'
           mode='horizontal'
           items={[
             {

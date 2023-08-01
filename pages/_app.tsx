@@ -50,7 +50,7 @@ function MyApp({ Component, pageProps, router }: any) {
   return (
     <Provider store={store}>
       <AuthContextProvider>
-        {!isMobile ? (
+        {!false ? (
           <>
             <NavBar />
             {isVerified==false && (
@@ -60,7 +60,7 @@ function MyApp({ Component, pageProps, router }: any) {
                   type='warning'
                 />
               )}
-            <div className='max-w-[1150px] my-0 mx-auto min-h-[85vh] p-1 relative'>
+            <div className='max-w-[1150px] my-0 mx-auto sm:min-h-[85vh] p-1 relative'>
               
               <Component {...pageProps} setUserVerified={setIsVerified} />
             </div>

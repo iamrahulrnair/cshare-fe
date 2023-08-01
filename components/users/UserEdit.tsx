@@ -36,7 +36,7 @@ export function UserEditBox({
   }
   return (
     <form className='p-3 flex flex-col' onSubmit={handleFormSubmit}>
-      <div className='flex gap-4 my-4'>
+      <div className='flex flex-col sm:flex-row gap-4 my-4'>
         <div>
           <label className='font-bold ' htmlFor='f_name'>
             First Name

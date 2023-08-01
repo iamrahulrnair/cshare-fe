@@ -36,13 +36,14 @@ const Home = (props: any) => {
         setUserVerified(false);
       }
     }
+    
   }, [authUser]);
   return (
     data.length > 0 &&
     data.map((code: codeDetailsProps, index) => {
       return (
         <>
-          <div className=' mt-20'>
+          <div className='mt-20 mx-10'>
             <div className='flex p-5 justify-start items-center'>
               <div>
                 <Avatar

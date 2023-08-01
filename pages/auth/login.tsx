@@ -3,21 +3,21 @@ import { useContext, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FormEvent } from 'react';
 import { toast } from 'react-toastify';
-import axios from 'axios';
-import _, { set } from 'lodash';
-import Router from 'next/router';
+import _ from 'lodash';
 
 import { Error } from '../../components/utils/Error';
 import { useRouter } from 'next/router';
 import { getFetcher } from '../../utils/axios/axios';
-import { clearAuthCookies, saveTokensAsCookie } from '../../utils/auth/cookie';
+import { saveTokensAsCookie } from '../../utils/auth/cookie';
 import { AuthContext } from '../../context/auth';
+import { GithubOutlined, LoadingOutlined } from '@ant-design/icons';
 
 const Login: NextPage = () => {
   const [userDetails, setUserDetails] = useState({
     email: '',
     password: '',
   });
+  const [oAuthStarted, setOAuthStarted] = useState(false);
   const [error, setError] = useState<{
     email: string | undefined;
     password: string | undefined;
@@ -71,14 +71,23 @@ const Login: NextPage = () => {
       });
     }
   }
+  async function handleSocialLogin() {
+    try {
+      setOAuthStarted(true);
+      window.location.href = process.env.NEXT_PUBLIC_OAUTH_URL as string;
+    } catch (err) {
+      console.log(err);
+      toast.error('social authentication failed');
+      setOAuthStarted(false);
+    }
+  }
 
   return (
-    <div className='m-auto flex justify-center '>
-      <form className='w-[50rem] h-[85vh] flex flex-col justify-center items-center'>
+      <form className='md:w-[50rem] md:p-0 md:h-[85vh] h-[50rem] flex flex-col justify-center items-center'>
         <div>
-          <h1 className='text-center'>Login to share code.</h1>
+          <h1 className='text-4xl sm:text-5xl'>Login to share code.</h1>
         </div>
-        <div className='flex flex-col w-full'>
+        <div className='flex flex-col w-[70%]'>
           <div className='flex flex-col justify-between my-5 space-y-4'>
             <label htmlFor='email'>Email</label>
             <input
@@ -87,7 +96,7 @@ const Login: NextPage = () => {
               type='text'
               id='email'
               name='email'
-              className='input--primary'
+              className='input--primary w-full'
             />
             {!_.isEmpty(error) && <Error msg={error.email} />}
           </div>
@@ -99,13 +108,14 @@ const Login: NextPage = () => {
               type='password'
               id='password'
               name='password'
-              className='input--primary'
+              className='input--primary w-full'
             />
             {!_.isEmpty(error) && <Error msg={error.password} />}
             {!_.isEmpty(error) && <Error msg={error.message} />}
           </div>
         </div>
-        <div className='mt-5 flex gap-5 justify-start items-center'>
+        <div className='mt-5 flex flex-col gap-5 justify-start items-center'>
+          <div className='flex gap-5 mb-5'>
           <button
             className='btn btn--success'
             onClick={handleFormSubmit}
@@ -113,7 +123,21 @@ const Login: NextPage = () => {
           >
             Login
           </button>
-          <div className='flex gap-5'>
+          <button
+            className='btn btn--success hover:bg-gray-900 hover:text-gray-100'
+            onClick={handleSocialLogin}
+            type='button'
+          >
+            <span>
+              {oAuthStarted ? (
+                <LoadingOutlined />
+              ) : (
+                <GithubOutlined className='text-3xl' />
+              )}
+            </span>
+          </button>
+          </div>
+          <div className='gap-5 flex'>
             <p className='cursor-pointer hover:text-green-800 underline underline-offset-4'>
               forgot password ?
             </p>
@@ -126,7 +150,6 @@ const Login: NextPage = () => {
           </div>
         </div>
       </form>
-    </div>
   );
 };
 export default Login;

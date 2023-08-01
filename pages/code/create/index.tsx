@@ -80,7 +80,7 @@ function App(pageProps: any) {
   }
 
   return (
-    <div className='mx-[120px] my-[auto] py-7 gap-7 flex flex-col'>
+    <div className='sm:w-[120rem] mx-10 my-[auto] py-7 gap-7 flex flex-col'>
       <input
         className='input--primary'
         name='description'

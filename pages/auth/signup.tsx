@@ -86,18 +86,18 @@ const Signup: NextPage = () => {
   }
 
   return (
-    <form className='container m-auto  flex flex-col justify-center items-center w-[50rem] h-[100%]'>
+    <form className='container m-auto  flex flex-col justify-center items-center sm:w-[50rem] h-[100%]'>
       <div>
-        <h1 className='text-center'>Signup to share code.</h1>
+        <h1 className='text-4xl sm:text-5xl'>Signup to share code.</h1>
       </div>
-      <div className='flex flex-col w-full'>
+      <div className='flex flex-col w-[70%]'>
         <div className='flex flex-col justify-between my-5 space-y-4'>
           <label htmlFor='fname'>
             First name
             <span className='subscript'>(optional)</span>
           </label>
           <input
-            className='input--primary'
+            className='input--primary w-full'
             value={userDetails.first_name}
             onChange={updateUserState}
             type='text'
@@ -170,7 +170,7 @@ const Signup: NextPage = () => {
           {!_.isEmpty(error) && <Error msg={error.password2} />}
         </div>
       </div>
-      <div className='mt-9 w-full flex gap-5 justify-start items-center mb-5'>
+      <div className='mt-9 w-full flex gap-5 flex-col sm:flex-row justify-start items-center mb-5'>
         <button
           className='btn btn--success mr-5'
           onClick={handleFormSubmit}

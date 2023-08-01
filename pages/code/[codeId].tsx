@@ -259,7 +259,7 @@ const CodeDetail: NextPage = (props: any) => {
   }
 
   return (
-    <div className='mx-[120px] my-[auto] py-10'>
+    <div className='mx-10 sm:w-[120rem] py-10'>
       <div className=' bg-slate-300 px-3 py-4 rounded-t-md flex gap-4 justify-between items-center'>
         <p className='mx-5'>{codeDetails.description}</p>
         {CODE_OWNER || PRIMARY_PREVILAGE ? (
@@ -278,17 +278,17 @@ const CodeDetail: NextPage = (props: any) => {
               >
                 {readOnly ? 'Edit' : 'Update'}
               </span>
-              <Divider type='vertical' />
-              {CODE_OWNER && (
-                <>
-                  <span
-                    className='hover:text-red-700 text-red-500 cursor-pointer'
-                    onClick={handleDelete}
-                  >
-                    Delete
-                  </span>
-                  <Divider type='vertical' />
-                </>
+                <Divider type='vertical' />
+                {CODE_OWNER && (
+                  <>
+                    <span
+                      className='hover:text-red-700 text-red-500 cursor-pointer'
+                      onClick={handleDelete}
+                    >
+                      Delete
+                    </span>
+                    <Divider type='vertical' />
+                  </>
               )}
               <span
                 className='hover:text-blue-700 text-blue-500 cursor-pointer  flex items-center gap-2'
@@ -423,7 +423,7 @@ const CodeDetail: NextPage = (props: any) => {
           </div>
         )}
       </div>
-      <div>
+      <div className='max-h-[500px] sm:h-full overflow-auto'>
         <CodeEditor
           options={{ readOnly, outerHeight: 500 }}
           handleCodeUpdate={handleCodeUpdate}

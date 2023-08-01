@@ -116,8 +116,8 @@ function Username({
 
   return (
     <section className='profile'>
-      <Row className=' min-h-[80vh] p-10 relative'>
-        <Col className='p-4 ' span={6}>
+      <Row className=' sm:min-h-[80vh] sm:p-10 relative'>
+        <Col className='p-4 ' span={8}>
           <div className='flex flex-col sticky top-[35px] '>
             <div className={`${styles.container} relative flex justify-center items-center`}>
               <Image
@@ -162,10 +162,10 @@ function Username({
               />
             ) : (
               <>
-                <h1 className='text-4xl font-bold'>
+                <h1 className='text-2xl sm:text-4xl font-bold'>
                   {userDetails.first_name} {userDetails.last_name}
                 </h1>
-                <h1 className='text-3xl font-light text-[#333333a6]'>
+                <h1 className='text-2xl  font-light text-[#333333a6]'>
                   {userDetails.username}
                 </h1>
                 <p>{userDetails.bio}</p>
@@ -175,7 +175,7 @@ function Username({
                     <>
                       <button
                         onClick={() => setShowProfileEditOptions(true)}
-                        className='btn btn--success m-6 cursor-pointer'
+                        className='btn btn--success my-4 sm:my-0 sm:m-6 cursor-pointer'
                         disabled={authUser.is_verified == false}
                       >
                         Edit profile
@@ -195,8 +195,8 @@ function Username({
                     </>
                   )}
                 </Link>
-                <div className='flex items-center '>
-                  <UserOutlined className='mr-2' />
+                <div className='flex items-center flex-col sm:flex-row my-5'>
+                  <UserOutlined className='mr-2 hidden sm:block' />
                   <div className='flex gap-2 font-bold hover:text-blue-500 cursor-pointer'>
                     <span>{userDetails.followers}</span>
                     <p onClick={() => setActiveKey('2')}>Followers</p>
@@ -211,15 +211,13 @@ function Username({
             )}
           </div>
         </Col>
-        <Col className='p-4' span={18}>
-          <div>
+        <Col className='p-4' span={16}>
             <Tabs
               activeKey={activeKey}
               defaultActiveKey='1'
               items={tabItems}
               onChange={onTabChange}
             />
-          </div>
         </Col>
       </Row>
     </section>

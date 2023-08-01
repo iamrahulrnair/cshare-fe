@@ -46,7 +46,7 @@ export default function AuthContextProvider({
     authUser,
     setAuthUser,
   };
-
+  
   return (
     <AuthContext.Provider value={{ ...state }}>{children}</AuthContext.Provider>
   );

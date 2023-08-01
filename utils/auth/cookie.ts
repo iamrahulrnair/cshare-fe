@@ -44,6 +44,15 @@ export function clearAuthCookies() {
   document.cookie = _cookie2;
 }
 
+export function clearOAuthCookies() {
+  const _cookie3 = cookie.serialize('token', '', {
+    path: '/',
+    expires: new Date(Date.now() - 1),
+    sameSite: 'lax',
+  });
+  document.cookie = _cookie3;
+}
+
 export function getCookie(name) {
   let cookieValue = null;
   if (typeof window != 'undefined') {

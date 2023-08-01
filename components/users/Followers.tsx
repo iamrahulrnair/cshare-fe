@@ -54,7 +54,7 @@ export function Followers({ user }: { user: string }) {
       {followers.map((follower) => {
         return (
           <React.Fragment key={follower.id}>
-            <div className='flex justify-between items-center'>
+            <div className='flex justify-between items-start sm:flex-row flex-col'>
               <div className='flex gap-4'>
                 <div>
                   <Avatar
@@ -63,18 +63,18 @@ export function Followers({ user }: { user: string }) {
                     alt=''
                   />
                 </div>
-                <div className='flex flex-col'>
-                  <div className='flex justify-center items-center'>
+                <div className='flex flex-col justify-center items-center'>
+                  <div className='sm:flex hidden'>
                     <p>{follower.follower_details.first_name}</p>
                     &nbsp;
                     <p>{follower.follower_details.last_name}</p>
                     &nbsp;
+                  </div>
                     <Link href={`/users/${follower.follower_details.username}`}>
-                      <a className='subscript '>
+                      <a className='subscript text-blue-400 underline'>
                         {follower.follower_details.username}
                       </a>
                     </Link>
-                  </div>
                 </div>
               </div>
               <div>

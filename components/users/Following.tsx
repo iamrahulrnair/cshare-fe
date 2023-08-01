@@ -55,23 +55,23 @@ export function Following({ user }: { user: string }) {
       {leaders.map((leader) => {
         return (
           <React.Fragment key={leader.id}>
-            <div className='flex justify-between items-center'>
+            <div className='flex justify-between items-start sm:flex-row flex-col '>
               <div className='flex gap-4'>
                 <div>
                   <Avatar size={50} src={leader.leader_details.image} alt='' />
                 </div>
-                <div className='flex flex-col'>
-                  <div className='flex justify-center items-center'>
-                    <p>{leader.leader_details.first_name}</p>
+                <div className='flex flex-col justify-center items-center'>
+                   <div className='sm:flex hidden'>
+                     <p>{leader.leader_details.first_name}</p>
                     &nbsp;
                     <p>{leader.leader_details.last_name}</p>
                     &nbsp;
+                   </div>
                     <Link href={`/users/${leader.leader_details.username}`}>
-                      <a className='subscript '>
+                      <a className='subscript text-blue-400 underline'>
                         {leader.leader_details.username}
                       </a>
                     </Link>
-                  </div>
                 </div>
               </div>
               <div>

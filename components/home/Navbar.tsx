@@ -6,7 +6,6 @@ import { AuthContext } from '../../context/auth';
 
 import styles from './styles/Navbar.module.scss';
 import { CloseOutlined, MenuOutlined } from '@ant-design/icons';
-import { set } from 'nprogress';
 
 export const NavBar = function ({ ref }: any) {
   const router = useRouter();
@@ -95,7 +94,7 @@ export const NavBar = function ({ ref }: any) {
                     ],
                     icon: (
                       <Avatar
-                        src={authUser.image}
+                        src={authUser.image?.startsWith('/')?authUser.image.split("/").pop():authUser.image}
                         size={35}
                         draggable={false}
                       />
@@ -113,7 +112,7 @@ export const NavBar = function ({ ref }: any) {
           mode='horizontal'
           items={[
             {
-              label: authUser.username.length>13?authUser.username.slice(0,10)+'...':authUser.username,
+              label: authUser.username?.length>13?authUser.username.slice(0,10)+'...':authUser.username,
               key: 'settings',
               children: [
                 {

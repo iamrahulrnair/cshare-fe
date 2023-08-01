@@ -19,6 +19,8 @@ function OAuthComplete() {
     const token =
       _cookie.token?.replace(/\\054/g, ',').replaceAll('\\', '') || `{}`;
     const { access_token, refresh_token } = JSON.parse(token);
+    console.log({token});
+    
 
     if (access_token && refresh_token) {
       clearAuthCookies();
@@ -36,10 +38,16 @@ function OAuthComplete() {
         })
 
         .catch((err) => {
+          console.log("here");
+          
+          console.log(err);
+          
           setAuthUser({ isAuthenticated: false });
           router.push('/auth/login');
         });
     } else {
+      console.log("there");
+
       setAuthUser({ isAuthenticated: false });
       toast.error('Invalid authentication');
       router.push('/auth/login');

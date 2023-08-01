@@ -50,50 +50,27 @@ function MyApp({ Component, pageProps, router }: any) {
   return (
     <Provider store={store}>
       <AuthContextProvider>
-        {!false ? (
-          <>
-            <NavBar />
-            {isVerified==false && (
-                <Alert
-                  className='h-[80px] text-center'
-                  message='You are not verfied yet. Please verify your email to access all the features.'
-                  type='warning'
-                />
-              )}
-            <div className='max-w-[1150px] my-0 mx-auto sm:min-h-[85vh] p-1 relative'>
-              
-              <Component {...pageProps} setUserVerified={setIsVerified} />
-            </div>
-            <Divider>
-              <p className='text-center text-gray-500'>
-                © 2023 <span className='text-gray-900 font-black'>Cshare</span>{' '}
-                by{' '}
-                <span>
-                  <a href='https://github.com/iamrahulrnair'>iamrahulrnair</a>
-                </span>
-              </p>
-            </Divider>
-          </>
-        ) : (
-          <div className='h-[100vh] flex justify-center items-center flex-col'>
-            <h1 className=''>
-              <span className='font-extrabold'>Know media queries?</span>{' '}
-              <span className='font-extralight'>
-                Fix an issue raised in
-                <a
-                  className='ml-3'
-                  href='https://github.com/iamrahulrnair/cshare-fe'
-                >
-                  Github
-                </a>
-              </span>
-            </h1>
-            <p className='subscript'>
-              Please access Cshare via Laptop / Desktop
-            </p>
+        <>
+          <NavBar />
+          {isVerified == false && (
+            <Alert
+              className='h-[80px] text-center'
+              message='You are not verfied yet. Please verify your email to access all the features.'
+              type='warning'
+            />
+          )}
+          <div className='max-w-[1150px] my-0 mx-auto sm:min-h-[85vh] p-1 relative'>
+            <Component {...pageProps} setUserVerified={setIsVerified} />
           </div>
-        )}
-
+          <Divider>
+            <p className='text-center text-gray-500'>
+              © 2023 <span className='text-gray-900 font-black'>Cshare</span> by{' '}
+              <span>
+                <a href='https://github.com/iamrahulrnair'>iamrahulrnair</a>
+              </span>
+            </p>
+          </Divider>
+        </>
         <ToastContainer />
       </AuthContextProvider>
     </Provider>

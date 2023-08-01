@@ -83,7 +83,7 @@ const Login: NextPage = () => {
   }
 
   return (
-      <form className='md:w-[50rem] md:p-0 md:h-[85vh] h-[50rem] flex flex-col justify-center items-center'>
+      <form className='md:w-[50rem] mx-auto md:p-0 md:h-[85vh] h-[50rem] flex flex-col justify-center items-center'>
         <div>
           <h1 className='text-4xl sm:text-5xl'>Login to share code.</h1>
         </div>
